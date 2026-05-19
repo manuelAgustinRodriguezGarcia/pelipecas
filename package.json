@@ -1,0 +1,22 @@
+{
+  "name": "pelipecas",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "lucide-react": "^1.16.0",
+    "next": "^15.3.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "sass": "^1.89.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.27.0",
+    "eslint-config-next": "^15.3.2"
+  }
+}
