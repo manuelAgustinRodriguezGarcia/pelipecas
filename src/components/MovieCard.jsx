@@ -1,5 +1,7 @@
-﻿import { Check, RotateCcw, Trash2 } from "lucide-react";
+﻿import { useRef } from "react";
+import { Check } from "lucide-react";
 import CinemaBadge from "./CinemaBadge";
+import MovieCardActionMenu from "./MovieCardActionMenu";
 import MoviePoster from "./MoviePoster";
 import styles from "@/styles/components.module.scss";
 import { formatWatchedDate } from "@/helpers/movieHelpers";
@@ -30,11 +32,31 @@ function MovieMeta({ movie, variant }) {
 export default function MovieCard({
   movie,
   variant = "pending",
-  onMarkWatched,
+  onSelect,
+  onOpenMarkWatched,
   onMoveToPending,
   onDelete,
   onSpinAgain,
 }) {
+  const cardRef = useRef(null);
+  const suppressClickRef = useRef(false);
+
+  const handleCardClick = () => {
+    if (suppressClickRef.current) {
+      suppressClickRef.current = false;
+      return;
+    }
+    onSelect?.(movie);
+  };
+
+  const handleCardKeyDown = (event) => {
+    if (!onSelect) return;
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      onSelect(movie);
+    }
+  };
+
   if (variant === "result") {
     return (
       <article className={`${styles.movieCard} ${styles.movieCardResult}`}>
@@ -45,7 +67,7 @@ export default function MovieCard({
           <button
             type="button"
             className={styles.btnPrimary}
-            onClick={() => onMarkWatched?.(movie.id)}
+            onClick={() => onOpenMarkWatched?.(movie.id)}
           >
             <Check size={16} strokeWidth={2.5} aria-hidden="true" />
             Marcar como vista
@@ -63,43 +85,33 @@ export default function MovieCard({
   }
 
   return (
-    <article className={styles.movieCard}>
+    <article
+      ref={cardRef}
+      className={`${styles.movieCard} ${styles.movieCardWithMenu} ${onSelect ? styles.movieCardClickable : ""}`}
+      onClick={onSelect ? handleCardClick : undefined}
+      onKeyDown={onSelect ? handleCardKeyDown : undefined}
+      role={onSelect ? "button" : undefined}
+      tabIndex={onSelect ? 0 : undefined}
+    >
       <MoviePoster movie={movie} />
-      <div className={styles.cardBody}>
-        <h3 className={styles.cardTitle}>{movie.title}</h3>
-        <MovieMeta movie={movie} variant={variant} />
-        <div className={styles.cardActions}>
-          {variant === "pending" ? (
-            <button
-              type="button"
-              className={styles.btnPrimary}
-              onClick={() => onMarkWatched?.(movie.id)}
-            >
-              <Check size={16} strokeWidth={2.5} aria-hidden="true" />
-              Marcar como vista
-            </button>
-          ) : (
-            <button
-              type="button"
-              className={styles.btnSecondary}
-              onClick={() => onMoveToPending?.(movie.id)}
-            >
-              <RotateCcw size={16} strokeWidth={1.75} aria-hidden="true" />
-              Mover a para ver
-            </button>
-          )}
-          <button
-            type="button"
-            className={styles.btnDanger}
-            onClick={() => onDelete?.(movie.id)}
-            aria-label={`Eliminar ${movie.title}`}
-          >
-            <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
-            Eliminar
-          </button>
+      <div className={`${styles.cardBody} ${styles.cardBodyWithMenu}`}>
+        <div className={styles.cardBodyMain}>
+          <h3 className={styles.cardTitle}>{movie.title}</h3>
+          <MovieMeta movie={movie} variant={variant} />
         </div>
+        <MovieCardActionMenu
+          cardRef={cardRef}
+          movieId={movie.id}
+          movieTitle={movie.title}
+          variant={variant}
+          onOpenMarkWatched={onOpenMarkWatched}
+          onMoveToPending={onMoveToPending}
+          onDelete={onDelete}
+          onSwipeOpen={() => {
+            suppressClickRef.current = true;
+          }}
+        />
       </div>
     </article>
   );
 }
-

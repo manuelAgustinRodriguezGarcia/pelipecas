@@ -1,8 +1,8 @@
-const TMDB_POSTER_BASE = "https://image.tmdb.org/t/p/w185";
+const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p";
 
-export function buildPosterUrl(posterPath) {
+export function buildPosterUrl(posterPath, size = "w185") {
   if (!posterPath) return null;
-  return `${TMDB_POSTER_BASE}${posterPath}`;
+  return `${TMDB_IMAGE_BASE}/${size}${posterPath}`;
 }
 
 export function extractYear(releaseDate) {

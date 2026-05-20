@@ -4,7 +4,8 @@ import styles from "@/styles/components.module.scss";
 export default function MovieList({
   movies,
   variant,
-  onMarkWatched,
+  onSelect,
+  onOpenMarkWatched,
   onMoveToPending,
   onDelete,
 }) {
@@ -15,7 +16,8 @@ export default function MovieList({
           <MovieCard
             movie={movie}
             variant={variant}
-            onMarkWatched={onMarkWatched}
+            onSelect={onSelect}
+            onOpenMarkWatched={onOpenMarkWatched}
             onMoveToPending={onMoveToPending}
             onDelete={onDelete}
           />

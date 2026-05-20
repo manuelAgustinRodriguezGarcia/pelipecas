@@ -10,6 +10,7 @@ import {
   getWatchedMovies,
   isDuplicateMovie,
   normalizeMovie,
+  normalizeRatings,
 } from "@/helpers/movieHelpers";
 
 function loadMoviesFromStorage() {
@@ -94,12 +95,17 @@ export function useMovies() {
     return { success: true };
   }, []);
 
-  const markAsWatched = useCallback((id) => {
+  const markAsWatched = useCallback((id, ratings) => {
     const now = new Date().toISOString();
     setMovies((current) =>
       current.map((movie) =>
         movie.id === id
-          ? { ...movie, status: "watched", watchedAt: now }
+          ? {
+              ...movie,
+              status: "watched",
+              watchedAt: now,
+              ratings: normalizeRatings(ratings),
+            }
           : movie
       )
     );
@@ -110,7 +116,12 @@ export function useMovies() {
     setMovies((current) =>
       current.map((movie) =>
         movie.id === id
-          ? { ...movie, status: "pending", watchedAt: null }
+          ? {
+              ...movie,
+              status: "pending",
+              watchedAt: null,
+              ratings: normalizeRatings(null),
+            }
           : movie
       )
     );
@@ -122,15 +133,21 @@ export function useMovies() {
     setPickedMovie((current) => (current?.id === id ? null : current));
   }, []);
 
-  const pickRandomMovie = useCallback(() => {
+  const pickRandomMovie = useCallback((movieId) => {
     let selected = null;
 
     setMovies((current) => {
       const pending = getPendingMovies(current);
       if (pending.length === 0) return current;
 
-      const randomIndex = Math.floor(Math.random() * pending.length);
-      selected = pending[randomIndex];
+      if (movieId) {
+        selected = pending.find((movie) => movie.id === movieId) ?? null;
+      } else {
+        const randomIndex = Math.floor(Math.random() * pending.length);
+        selected = pending[randomIndex];
+      }
+
+      if (!selected) return current;
 
       return current.map((movie) =>
         movie.id === selected.id

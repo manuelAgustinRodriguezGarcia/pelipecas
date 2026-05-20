@@ -1,13 +1,18 @@
-﻿import Image from "next/image";
+﻿"use client";
+
+import { useState } from "react";
+import Image from "next/image";
 import { Film } from "lucide-react";
 import { generateMovieVisual } from "@/helpers/movieHelpers";
 import styles from "@/styles/components.module.scss";
 
 export default function MovieSearchResultItem({ movie, onSelect }) {
+  const [imageError, setImageError] = useState(false);
   const visual = generateMovieVisual(movie.title);
   const showOriginal =
     movie.originalTitle &&
     movie.originalTitle.toLowerCase() !== movie.title.toLowerCase();
+  const showPoster = movie.posterUrl && !imageError;
 
   return (
     <button
@@ -17,7 +22,7 @@ export default function MovieSearchResultItem({ movie, onSelect }) {
       aria-label={`Agregar ${movie.title}`}
     >
       <div className={styles.searchResultPoster}>
-        {movie.posterUrl ? (
+        {showPoster ? (
           <Image
             src={movie.posterUrl}
             alt=""
@@ -25,6 +30,8 @@ export default function MovieSearchResultItem({ movie, onSelect }) {
             height={64}
             className={styles.searchResultPosterImage}
             sizes="42px"
+            unoptimized
+            onError={() => setImageError(true)}
           />
         ) : (
           <div
@@ -53,5 +60,3 @@ export default function MovieSearchResultItem({ movie, onSelect }) {
     </button>
   );
 }
-
-

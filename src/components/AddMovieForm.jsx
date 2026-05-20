@@ -1,6 +1,5 @@
 ﻿"use client";
 
-import { Plus } from "lucide-react";
 import { useCallback, useRef, useState } from "react";
 import { useTmdbSearch } from "@/hooks/useTmdbSearch";
 import MovieSearchResults from "./MovieSearchResults";
@@ -116,14 +115,6 @@ export default function AddMovieForm({ onSelectMovie, onAddManual }) {
               autoComplete="off"
             />
           </div>
-          <button
-            type="submit"
-            className={styles.addButton}
-            aria-label="Agregar película"
-          >
-            <Plus className={styles.iconSm} strokeWidth={2.5} aria-hidden="true" />
-            <span>Agregar</span>
-          </button>
         </div>
 
         <MovieSearchResults

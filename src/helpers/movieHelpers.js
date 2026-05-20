@@ -33,6 +33,45 @@ const TMDB_DEFAULTS = {
   voteAverage: null,
 };
 
+export const RATING_CATEGORIES = [
+  { key: "specialEffects", label: "Efectos Especiales" },
+  { key: "music", label: "Música" },
+  { key: "acting", label: "Actuación" },
+  { key: "characters", label: "Personajes" },
+  { key: "story", label: "Historia" },
+];
+
+export function createEmptyRatings() {
+  return {
+    specialEffects: null,
+    music: null,
+    acting: null,
+    characters: null,
+    story: null,
+  };
+}
+
+export function normalizeRatings(ratings) {
+  const empty = createEmptyRatings();
+  if (!ratings || typeof ratings !== "object") return empty;
+
+  for (const category of RATING_CATEGORIES) {
+    const value = ratings[category.key];
+    if (typeof value === "number" && value >= 0 && value <= 5) {
+      empty[category.key] = value;
+    }
+  }
+
+  return empty;
+}
+
+export function isRatingsComplete(ratings) {
+  return RATING_CATEGORIES.every((category) => {
+    const value = ratings?.[category.key];
+    return typeof value === "number" && value >= 0 && value <= 5;
+  });
+}
+
 function hashTitle(title) {
   let hash = 0;
   for (let i = 0; i < title.length; i += 1) {
@@ -82,6 +121,7 @@ export function normalizeMovie(movie) {
     posterPath,
     posterUrl: movie.posterUrl ?? buildPosterUrl(posterPath),
     voteAverage: movie.voteAverage ?? null,
+    ratings: normalizeRatings(movie.ratings),
   };
 }
 
@@ -166,17 +206,3 @@ export function getShortTitle(title, maxLength = 12) {
   return `${title.slice(0, maxLength - 1)}…`;
 }
 
-export function getRouletteSegments(pendingMovies, maxVisible = 8) {
-  if (pendingMovies.length === 0) return [];
-  if (pendingMovies.length <= maxVisible) return pendingMovies;
-
-  const step = pendingMovies.length / maxVisible;
-  const segments = [];
-
-  for (let i = 0; i < maxVisible; i += 1) {
-    const index = Math.floor(i * step);
-    segments.push(pendingMovies[index]);
-  }
-
-  return segments;
-}
