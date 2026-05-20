@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { CircleCheck, MessageCircleQuestion, Star, X } from "lucide-react";
 import {
   RATING_CATEGORIES,
@@ -29,19 +29,25 @@ export default function MarkWatchedModal({
   const isVisible = embedded ? Boolean(movie) : internalClose.isVisible;
   const isClosing = embedded ? isClosingProp : internalClose.isClosing;
 
-  const requestClose = (afterClose) => {
-    if (embedded) {
-      onClose?.(afterClose);
-      return;
-    }
-    internalClose.requestClose(afterClose);
-  };
+  const requestClose = useCallback(
+    (afterClose) => {
+      if (embedded) {
+        onClose?.(afterClose);
+        return;
+      }
+      internalClose.requestClose(afterClose);
+    },
+    [embedded, onClose, internalClose.requestClose]
+  );
 
   useEffect(() => {
-    if (!movie) return undefined;
-
+    if (!movie) return;
     setVoteAverage(movie.voteAverage ?? null);
     setRatings(createEmptyRatings());
+  }, [movie?.id]);
+
+  useEffect(() => {
+    if (!isVisible || !movie) return undefined;
 
     const handleKeyDown = (event) => {
       if (event.key === "Escape") requestClose();
@@ -51,7 +57,7 @@ export default function MarkWatchedModal({
     dialogRef.current?.focus();
 
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [movie, requestClose]);
+  }, [isVisible, movie, requestClose]);
 
   useEffect(() => {
     if (!movie?.tmdbId || movie.voteAverage != null) return undefined;
