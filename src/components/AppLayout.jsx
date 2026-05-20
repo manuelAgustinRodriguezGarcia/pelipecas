@@ -17,9 +17,7 @@ export default function AppLayout({ children }) {
   if (!isLoaded) {
     return (
       <div className={appStyles.desktopBackdrop}>
-        <div className={appStyles.appShell}>
-          <AppInitialLoader />
-        </div>
+        <AppInitialLoader />
       </div>
     );
   }

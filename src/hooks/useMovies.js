@@ -8,6 +8,7 @@ import {
   getPendingMovies,
   getWatchedMovies,
   isDuplicateMovie,
+  migrateStoredMovies,
   normalizeMovie,
   normalizeRatings,
 } from "@/helpers/movieHelpers";
@@ -26,7 +27,8 @@ function loadMoviesFromStorage() {
       return [];
     }
 
-    return parsed.map(normalizeMovie).filter(Boolean);
+    const movies = parsed.map(normalizeMovie).filter(Boolean);
+    return migrateStoredMovies(movies);
   } catch {
     return [];
   }

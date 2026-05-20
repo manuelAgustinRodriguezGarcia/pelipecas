@@ -11,7 +11,7 @@ export default function Header() {
 
   return (
     <>
-      <header className={styles.header}>
+      <header className={styles.header} aria-label="Pelipecas">
         <div className={styles.headerContent}>
           <div className={styles.headerLogo} aria-hidden="true">
             <Image
@@ -21,7 +21,6 @@ export default function Header() {
               height={71}
               priority
               className={styles.headerLogoImg}
-              style={{ width: "auto", height: "100%" }}
             />
           </div>
           <div className={styles.headerText}>

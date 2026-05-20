@@ -132,6 +132,10 @@
     width: 100%;
     max-width: 100%;
   }
+
+  .main {
+    min-height: calc(100vh - 92px);
+  }
 }
 
 @media (min-width: 768px) and (max-width: 1023.98px) {

@@ -30,7 +30,7 @@ export default function WatchedPage() {
       <div className={appStyles.sectionHeader}>
         <h2 className={appStyles.sectionTitle}>Las vimos</h2>
         <p className={`bodyText ${appStyles.sectionSubtitle}`}>
-          Películas que ya formaron parte de tu colección.
+          Películas que ya vimos con sus calificaciones.
         </p>
       </div>
 

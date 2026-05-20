@@ -1,6 +1,19 @@
 import { buildPosterUrl, extractYear } from "@/helpers/tmdbHelpers";
 
 export const STORAGE_KEY = "pelipecas_movies";
+export const LEGACY_SEED_MIGRATION_KEY = "pelipecas_seed_removed_v1";
+
+/** Películas de ejemplo del MVP inicial; se eliminan en la migración. */
+const LEGACY_SEED_TITLES = [
+  "Interestelar",
+  "La La Land",
+  "Spider-Man: Sin Camino a Casa",
+  "Parásitos",
+  "El Padrino",
+  "El Señor de los Anillos",
+  "Joker",
+  "El Viaje de Chihiro",
+];
 
 const POSTER_VARIANTS = [
   "posterNoir",
@@ -216,5 +229,46 @@ export function formatWatchedDate(isoString) {
 export function getShortTitle(title, maxLength = 12) {
   if (title.length <= maxLength) return title;
   return `${title.slice(0, maxLength - 1)}…`;
+}
+
+const legacySeedTitleSet = new Set(
+  LEGACY_SEED_TITLES.map((title) => normalizeTitle(title))
+);
+
+/** Quita películas mock del seed original (sin datos TMDB). */
+export function removeLegacySeedMovies(movies) {
+  return movies.filter((movie) => {
+    if (movie.tmdbId != null) return true;
+    return !legacySeedTitleSet.has(normalizeTitle(movie.title));
+  });
+}
+
+export function migrateStoredMovies(rawMovies) {
+  if (typeof window === "undefined") return rawMovies;
+
+  if (window.localStorage.getItem(LEGACY_SEED_MIGRATION_KEY) === "1") {
+    return rawMovies;
+  }
+
+  const cleaned = removeLegacySeedMovies(rawMovies);
+  window.localStorage.setItem(LEGACY_SEED_MIGRATION_KEY, "1");
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
+
+  return cleaned;
+}
+
+export function getRouletteSegments(pendingMovies, maxVisible = 8) {
+  if (pendingMovies.length === 0) return [];
+  if (pendingMovies.length <= maxVisible) return pendingMovies;
+
+  const step = pendingMovies.length / maxVisible;
+  const segments = [];
+
+  for (let i = 0; i < maxVisible; i += 1) {
+    const index = Math.floor(i * step);
+    segments.push(pendingMovies[index]);
+  }
+
+  return segments;
 }
 

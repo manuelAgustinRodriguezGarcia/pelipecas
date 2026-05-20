@@ -42,6 +42,10 @@
   padding: var(--spacing-xl) var(--spacing-lg) var(--spacing-lg);
   border-bottom: 1px solid var(--color-border-soft);
 
+  @media (max-width: 767.98px) {
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+
   @media (min-width: 1024px) {
     padding: var(--spacing-lg) var(--spacing-xxl);
   }
@@ -51,7 +55,13 @@
   display: flex;
   align-items: stretch;
   gap: var(--spacing-md);
+  width: 100%;
   min-height: 0;
+
+  @media (max-width: 767.98px) {
+    align-items: center;
+    min-height: 64px;
+  }
 }
 
 .headerLogo {
@@ -59,6 +69,11 @@
   align-items: center;
   flex-shrink: 0;
   align-self: stretch;
+
+  @media (max-width: 767.98px) {
+    align-self: center;
+    height: 64px;
+  }
 }
 
 .headerLogoImg {
@@ -67,6 +82,11 @@
   width: auto;
   max-width: none;
   object-fit: contain;
+
+  @media (max-width: 767.98px) {
+    height: 64px;
+    width: auto;
+  }
 }
 
 .headerText {
@@ -76,11 +96,16 @@
   justify-content: center;
   gap: var(--spacing-xs);
   min-width: 0;
+
+  @media (max-width: 767.98px) {
+    display: none;
+  }
 }
 
 .headerHeartButton {
   flex-shrink: 0;
   align-self: center;
+  margin-left: auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1788,36 +1813,46 @@
 }
 
 .appInitialLoader {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-lg);
-  min-height: 100dvh;
-  min-height: 100vh;
   padding: var(--spacing-xl);
   background:
     radial-gradient(ellipse 70% 45% at 50% 0%, rgba(212, 175, 55, 0.06) 0%, transparent 55%),
     var(--color-bg);
 }
 
+.appInitialLoaderCenter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xl);
+  transform: translateY(-4%);
+}
+
 .appInitialLoaderLogo {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 220px;
+  height: 220px;
+  flex-shrink: 0;
 }
 
 .appInitialLoaderLogoImg {
-  width: auto;
-  height: auto;
-  max-width: 96px;
-  max-height: 96px;
+  display: block;
+  width: 220px;
+  height: 220px;
   object-fit: contain;
   filter: drop-shadow(0 8px 24px rgba(212, 175, 55, 0.2));
 }
 
 .appInitialLoaderText {
   margin: 0;
+  min-height: 1.25rem;
   font-size: 0.875rem;
   letter-spacing: 0.04em;
   color: var(--color-text-secondary);
