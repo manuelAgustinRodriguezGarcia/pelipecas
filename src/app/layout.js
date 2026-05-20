@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Pelipecas — Tu cartelera personal de películas",
+  title: "Pelipecas",
   description:
     "Organizá tu cartelera personal, registrá películas vistas y dejá que Pelipecas elija tu próxima función.",
   icons: {

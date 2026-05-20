@@ -87,7 +87,7 @@ export default function LoveNoteModal({ isOpen, onClose }) {
         <p className={styles.loveNoteMessage}>
           Pelipecas fue creada para poder anotar las películas que quiero ver con
           el <span className={styles.loveNoteGold}>amor de mi vida</span>. Fue
-          hecha con cariño y para poder compartir mil películas más juntos.
+          hecha con mucho amor y para poder compartir mil películas más juntos.
         </p>
 
         <p className={styles.loveNoteClosing}>
