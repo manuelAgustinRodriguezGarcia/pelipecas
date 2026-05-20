@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { EllipsisVertical, SquareArrowLeft, SquareCheck, Trash2 } from "lucide-react";
+import { CircleCheck, EllipsisVertical, SquareArrowLeft, Trash2 } from "lucide-react";
 import { useCardSwipeOpen } from "@/hooks/useCardSwipeOpen";
 import styles from "@/styles/components.module.scss";
 
@@ -16,7 +16,7 @@ export default function MovieCardActionMenu({
   movieId,
   movieTitle,
   variant,
-  onOpenMarkWatched,
+  onSelectMovie,
   onMoveToPending,
   onDelete,
   onSwipeOpen,
@@ -88,7 +88,7 @@ export default function MovieCardActionMenu({
   const handlePrimaryAction = (event) => {
     stopCardClick(event);
     if (variant === "pending") {
-      onOpenMarkWatched?.(movieId);
+      onSelectMovie?.();
     } else {
       onMoveToPending?.(movieId);
     }
@@ -103,7 +103,7 @@ export default function MovieCardActionMenu({
 
   const primaryLabel =
     variant === "pending"
-      ? `Marcar ${movieTitle} como vista`
+      ? `La vimos: ${movieTitle}`
       : `Mover ${movieTitle} a para ver`;
 
   return (
@@ -160,7 +160,7 @@ export default function MovieCardActionMenu({
               aria-label={primaryLabel}
             >
               {variant === "pending" ? (
-                <SquareCheck size={20} strokeWidth={2} aria-hidden="true" />
+                <CircleCheck size={20} strokeWidth={1.5} aria-hidden="true" />
               ) : (
                 <SquareArrowLeft size={20} strokeWidth={2} aria-hidden="true" />
               )}

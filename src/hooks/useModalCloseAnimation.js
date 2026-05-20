@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-export const MODAL_CLOSE_MS = 250;
+export const MODAL_CLOSE_MS = 520;
 
 export function useModalCloseAnimation(isOpen, onClose) {
   const [isClosing, setIsClosing] = useState(false);

@@ -11,17 +11,6 @@ const POSTER_VARIANTS = [
   "posterElegant",
 ];
 
-const SEED_MOVIES = [
-  { title: "Interestelar", status: "pending" },
-  { title: "La La Land", status: "pending" },
-  { title: "Spider-Man: Sin Camino a Casa", status: "pending" },
-  { title: "Parásitos", status: "pending" },
-  { title: "El Padrino", status: "pending" },
-  { title: "El Señor de los Anillos", status: "watched" },
-  { title: "Joker", status: "watched" },
-  { title: "El Viaje de Chihiro", status: "watched" },
-];
-
 const TMDB_DEFAULTS = {
   tmdbId: null,
   originalTitle: null,
@@ -57,7 +46,7 @@ export function normalizeRatings(ratings) {
 
   for (const category of RATING_CATEGORIES) {
     const value = ratings[category.key];
-    if (typeof value === "number" && value >= 0 && value <= 5) {
+    if (typeof value === "number" && value >= 1 && value <= 5) {
       empty[category.key] = value;
     }
   }
@@ -68,8 +57,24 @@ export function normalizeRatings(ratings) {
 export function isRatingsComplete(ratings) {
   return RATING_CATEGORIES.every((category) => {
     const value = ratings?.[category.key];
-    return typeof value === "number" && value >= 0 && value <= 5;
+    return typeof value === "number" && value >= 1 && value <= 5;
   });
+}
+
+export function getUserAverageRating(ratings) {
+  if (!isRatingsComplete(ratings)) return null;
+
+  const sum = RATING_CATEGORIES.reduce(
+    (total, category) => total + ratings[category.key],
+    0
+  );
+
+  return sum / RATING_CATEGORIES.length;
+}
+
+export function getDisplayStarRating(average) {
+  if (average == null) return 0;
+  return Math.round(average * 2) / 2;
 }
 
 function hashTitle(title) {
@@ -185,10 +190,6 @@ export function isDuplicateMovie(movies, { title, tmdbId }) {
     return isDuplicateTmdbId(movies, tmdbId);
   }
   return isDuplicateTitle(movies, title);
-}
-
-export function getSeedMovies() {
-  return SEED_MOVIES.map((seed) => createMovie(seed.title, seed.status));
 }
 
 export function formatWatchedDate(isoString) {

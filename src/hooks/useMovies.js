@@ -1,12 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import {
   STORAGE_KEY,
   createMovie,
   createMovieFromTmdb,
   getPendingMovies,
-  getSeedMovies,
   getWatchedMovies,
   isDuplicateMovie,
   normalizeMovie,
@@ -19,17 +18,17 @@ function loadMoviesFromStorage() {
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
     if (!stored) {
-      return getSeedMovies().map(normalizeMovie).filter(Boolean);
+      return [];
     }
 
     const parsed = JSON.parse(stored);
-    if (!Array.isArray(parsed) || parsed.length === 0) {
-      return getSeedMovies().map(normalizeMovie).filter(Boolean);
+    if (!Array.isArray(parsed)) {
+      return [];
     }
 
     return parsed.map(normalizeMovie).filter(Boolean);
   } catch {
-    return getSeedMovies().map(normalizeMovie).filter(Boolean);
+    return [];
   }
 }
 
@@ -38,9 +37,8 @@ export function useMovies() {
   const [pickedMovie, setPickedMovie] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  useEffect(() => {
-    const loaded = loadMoviesFromStorage();
-    setMovies(loaded);
+  useLayoutEffect(() => {
+    setMovies(loadMoviesFromStorage() ?? []);
     setIsLoaded(true);
   }, []);
 
@@ -172,6 +170,29 @@ export function useMovies() {
     setPickedMovie(null);
   }, []);
 
+  const importMoviesFromShare = useCallback((importedMovies) => {
+    const normalized = importedMovies.map(normalizeMovie).filter(Boolean);
+    let imported = 0;
+    let skipped = 0;
+
+    setMovies((current) => {
+      let next = [...current];
+
+      for (const movie of normalized) {
+        if (isDuplicateMovie(next, { title: movie.title, tmdbId: movie.tmdbId })) {
+          skipped += 1;
+        } else {
+          next = [movie, ...next];
+          imported += 1;
+        }
+      }
+
+      return next;
+    });
+
+    return { imported, skipped };
+  }, []);
+
   return {
     movies,
     pendingMovies,
@@ -183,6 +204,7 @@ export function useMovies() {
     deleteMovie,
     pickRandomMovie,
     clearPickedMovie,
+    importMoviesFromShare,
     pickedMovie,
     isLoaded,
   };

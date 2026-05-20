@@ -1,15 +1,18 @@
-﻿import { useRef } from "react";
+﻿"use client";
+
+import { useRef } from "react";
 import { Check } from "lucide-react";
 import CinemaBadge from "./CinemaBadge";
 import MovieCardActionMenu from "./MovieCardActionMenu";
+import MovieCardActions from "./MovieCardActions";
 import MoviePoster from "./MoviePoster";
 import styles from "@/styles/components.module.scss";
-import { formatWatchedDate } from "@/helpers/movieHelpers";
+import { formatWatchedDate, isRatingsComplete } from "@/helpers/movieHelpers";
+import UserRatingPanel from "./UserRatingPanel";
 
 function MovieMeta({ movie, variant }) {
   return (
     <div className={styles.cardMeta}>
-      {variant === "pending" && <CinemaBadge variant="pending">Para ver</CinemaBadge>}
       {variant === "watched" && (
         <>
           <CinemaBadge variant="watched">Vista</CinemaBadge>
@@ -39,13 +42,8 @@ export default function MovieCard({
   onSpinAgain,
 }) {
   const cardRef = useRef(null);
-  const suppressClickRef = useRef(false);
 
   const handleCardClick = () => {
-    if (suppressClickRef.current) {
-      suppressClickRef.current = false;
-      return;
-    }
     onSelect?.(movie);
   };
 
@@ -60,25 +58,28 @@ export default function MovieCard({
   if (variant === "result") {
     return (
       <article className={`${styles.movieCard} ${styles.movieCardResult}`}>
-        <MoviePoster movie={movie} size="large" />
-        <h3 className={styles.cardTitle}>{movie.title}</h3>
-        <MovieMeta movie={movie} variant="result" />
-        <div className={styles.resultActions}>
-          <button
-            type="button"
-            className={styles.btnPrimary}
-            onClick={() => onOpenMarkWatched?.(movie.id)}
-          >
-            <Check size={16} strokeWidth={2.5} aria-hidden="true" />
-            Marcar como vista
-          </button>
-          <button
-            type="button"
-            className={styles.btnSecondary}
-            onClick={onSpinAgain}
-          >
-            Volver a sortear
-          </button>
+        <MoviePoster movie={movie} size="cardVertical" />
+        <div className={styles.cardContent}>
+          <CinemaBadge variant="picked">Película seleccionada</CinemaBadge>
+          <h3 className={styles.cardTitle}>{movie.title}</h3>
+          <MovieMeta movie={movie} variant="result" />
+          <div className={styles.resultActions}>
+            <button
+              type="button"
+              className={styles.btnPrimary}
+              onClick={() => onOpenMarkWatched?.(movie.id)}
+            >
+              <Check size={16} strokeWidth={2.5} aria-hidden="true" />
+              Marcar como vista
+            </button>
+            <button
+              type="button"
+              className={styles.btnSecondary}
+              onClick={onSpinAgain}
+            >
+              Elegir otra
+            </button>
+          </div>
         </div>
       </article>
     );
@@ -87,29 +88,45 @@ export default function MovieCard({
   return (
     <article
       ref={cardRef}
-      className={`${styles.movieCard} ${styles.movieCardWithMenu} ${onSelect ? styles.movieCardClickable : ""}`}
-      onClick={onSelect ? handleCardClick : undefined}
-      onKeyDown={onSelect ? handleCardKeyDown : undefined}
-      role={onSelect ? "button" : undefined}
-      tabIndex={onSelect ? 0 : undefined}
+      className={`${styles.movieCard} ${styles.movieCardResponsive} ${styles.movieCardWithMenu} ${styles.cardBodyWithMenu}`}
     >
-      <MoviePoster movie={movie} />
-      <div className={`${styles.cardBody} ${styles.cardBodyWithMenu}`}>
-        <div className={styles.cardBodyMain}>
-          <h3 className={styles.cardTitle}>{movie.title}</h3>
-          <MovieMeta movie={movie} variant={variant} />
+      <div className={styles.cardLayout}>
+        <div
+          className={`${styles.cardClickArea} ${onSelect ? styles.movieCardClickable : ""}`}
+          onClick={onSelect ? handleCardClick : undefined}
+          onKeyDown={onSelect ? handleCardKeyDown : undefined}
+          role={onSelect ? "button" : undefined}
+          tabIndex={onSelect ? 0 : undefined}
+        >
+          <MoviePoster movie={movie} size="cardVertical" />
+          <div className={styles.cardContentMain}>
+            <h3 className={styles.cardTitle}>{movie.title}</h3>
+            <MovieMeta movie={movie} variant={variant} />
+            {variant === "watched" && isRatingsComplete(movie.ratings) && (
+              <UserRatingPanel ratings={movie.ratings} compact />
+            )}
+          </div>
         </div>
-        <MovieCardActionMenu
-          cardRef={cardRef}
+        <div className={styles.cardActionsMobile}>
+          <MovieCardActionMenu
+            cardRef={cardRef}
+            movieId={movie.id}
+            movieTitle={movie.title}
+            variant={variant}
+            onSelectMovie={variant === "pending" ? () => onSelect?.(movie) : undefined}
+            onMoveToPending={onMoveToPending}
+            onDelete={onDelete}
+          />
+        </div>
+      </div>
+      <div className={styles.cardFooterDesktop}>
+        <MovieCardActions
           movieId={movie.id}
           movieTitle={movie.title}
           variant={variant}
-          onOpenMarkWatched={onOpenMarkWatched}
+          onSelectMovie={variant === "pending" ? () => onSelect?.(movie) : undefined}
           onMoveToPending={onMoveToPending}
           onDelete={onDelete}
-          onSwipeOpen={() => {
-            suppressClickRef.current = true;
-          }}
         />
       </div>
     </article>

@@ -10,25 +10,26 @@ export default function MoviePoster({ movie, size = "default", className = "" })
   const [imageError, setImageError] = useState(false);
   const visual = generateMovieVisual(movie.title);
   const isLarge = size === "large";
+  const isCardVertical = size === "cardVertical";
   const isFullWidth = size === "fullWidth";
-  const isRevealResult = size === "revealResult";
-  const isWidePoster = isFullWidth || isRevealResult;
+  const isWidePoster = isFullWidth || isCardVertical;
 
   const posterSrc = isWidePoster
-    ? buildPosterUrl(movie.posterPath, "w500") ?? movie.posterUrl
+    ? buildPosterUrl(movie.posterPath, isCardVertical ? "w342" : "w500") ??
+      movie.posterUrl
     : movie.posterUrl;
 
-  if (isRevealResult) {
+  if (isCardVertical) {
     const altText = `Poster de ${movie.title}`;
 
     if (posterSrc && !imageError) {
       return (
-        <div className={`${styles.revealResultPoster} ${className}`.trim()}>
+        <div className={`${styles.cardVerticalPoster} ${className}`.trim()}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={posterSrc}
             alt={altText}
-            className={styles.revealResultPosterImg}
+            className={styles.cardVerticalPosterImg}
             loading="lazy"
             decoding="async"
             onError={() => setImageError(true)}
@@ -39,7 +40,7 @@ export default function MoviePoster({ movie, size = "default", className = "" })
 
     return (
       <div
-        className={`${styles.revealResultPoster} ${styles.revealResultPosterFallback} ${styles[visual.posterVariant]} ${className}`.trim()}
+        className={`${styles.cardVerticalPoster} ${styles.cardVerticalPosterFallback} ${styles[visual.posterVariant]} ${className}`.trim()}
         role="img"
         aria-label={altText}
       >

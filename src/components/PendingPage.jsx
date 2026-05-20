@@ -1,18 +1,30 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Armchair, Plus, Ticket } from "lucide-react";
 import { useAppUI } from "@/context/AppUIContext";
 import { useMoviesContext } from "@/context/MoviesContext";
 import AddMovieForm from "@/components/AddMovieForm";
+import MovieSortDropdown from "@/components/MovieSortDropdown";
 import MovieList from "@/components/MovieList";
 import EmptyState from "@/components/EmptyState";
+import {
+  DEFAULT_PENDING_SORT,
+  sortPendingMovies,
+} from "@/helpers/movieSortHelpers";
 import appStyles from "@/styles/app.module.scss";
 
 export default function PendingPage() {
   const router = useRouter();
   const { onSelectMovie, onOpenMarkWatched, onDelete } = useAppUI();
   const { pendingMovies, addMovieFromTmdb, addMovieManually } = useMoviesContext();
+  const [sortBy, setSortBy] = useState(DEFAULT_PENDING_SORT);
+
+  const sortedPendingMovies = useMemo(
+    () => sortPendingMovies(pendingMovies, sortBy),
+    [pendingMovies, sortBy]
+  );
 
   const focusAddInput = () => {
     router.push("/para-ver");
@@ -34,6 +46,7 @@ export default function PendingPage() {
       <AddMovieForm
         onSelectMovie={addMovieFromTmdb}
         onAddManual={addMovieManually}
+        sortControl={<MovieSortDropdown value={sortBy} onChange={setSortBy} />}
       />
 
       {pendingMovies.length > 0 && (
@@ -59,7 +72,7 @@ export default function PendingPage() {
         />
       ) : (
         <MovieList
-          movies={pendingMovies}
+          movies={sortedPendingMovies}
           variant="pending"
           onSelect={onSelectMovie}
           onOpenMarkWatched={onOpenMarkWatched}

@@ -12,15 +12,6 @@ export default function StarRatingRow({ label, value, onChange }) {
         role="radiogroup"
         aria-label={`${label}: ${value ?? "sin puntuar"}`}
       >
-        <button
-          type="button"
-          className={`${styles.ratingStarBtn} ${styles.ratingZeroBtn} ${value === 0 ? styles.ratingStarBtnActive : ""}`}
-          onClick={() => onChange(0)}
-          aria-label={`0 estrellas para ${label}`}
-          aria-pressed={value === 0}
-        >
-          0
-        </button>
         {[1, 2, 3, 4, 5].map((star) => {
           const isFilled = value != null && star <= value;
           return (

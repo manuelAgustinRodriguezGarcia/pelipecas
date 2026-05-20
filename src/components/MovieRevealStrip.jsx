@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import {
+  REVEAL_ROLL_MS,
   calculateRevealOffsets,
   measureRevealStripMetrics,
 } from "@/helpers/revealHelpers";
@@ -11,6 +12,7 @@ import styles from "@/styles/components.module.scss";
 export default function MovieRevealStrip({
   items,
   targetIndex,
+  motionPattern,
   isRolling,
   isRevealed,
   isIdle = false,
@@ -19,6 +21,15 @@ export default function MovieRevealStrip({
   const viewportRef = useRef(null);
   const stripRef = useRef(null);
   const hasStartedRef = useRef(false);
+  const lockedOffsetRef = useRef(null);
+
+  const applyMotionStyle = useCallback(() => {
+    const strip = stripRef.current;
+    if (!strip || !motionPattern) return;
+    strip.style.setProperty("--reveal-duration", `${motionPattern.durationMs}ms`);
+    strip.style.setProperty("--reveal-easing", motionPattern.easing);
+    strip.dataset.motion = motionPattern.id;
+  }, [motionPattern]);
 
   const applyOffset = useCallback((offsetPx, withTransition) => {
     const strip = stripRef.current;
@@ -35,11 +46,13 @@ export default function MovieRevealStrip({
     if (!metrics) return;
 
     hasStartedRef.current = true;
+    applyMotionStyle();
     const { initialOffset, finalOffset } = calculateRevealOffsets(
       metrics.containerWidth,
       targetIndex,
       metrics.cardWidth,
-      metrics.gap
+      metrics.gap,
+      motionPattern
     );
 
     applyOffset(initialOffset, false);
@@ -49,13 +62,15 @@ export default function MovieRevealStrip({
         applyOffset(finalOffset, true);
       });
     });
-  }, [items.length, targetIndex, applyOffset]);
+  }, [items.length, targetIndex, motionPattern, applyMotionStyle, applyOffset]);
 
   useEffect(() => {
     if (!isRolling) {
       hasStartedRef.current = false;
       return undefined;
     }
+
+    lockedOffsetRef.current = null;
 
     if (items.length === 0 || hasStartedRef.current) return undefined;
 
@@ -69,39 +84,36 @@ export default function MovieRevealStrip({
     if (!strip || !isRolling) return undefined;
 
     const handleTransitionEnd = (event) => {
+      if (event.target !== strip) return;
       if (event.propertyName !== "transform") return;
       if (strip.dataset.transitioning !== "true") return;
+
+      const metrics = measureRevealStripMetrics(strip, targetIndex);
+      if (metrics) {
+        const { finalOffset } = calculateRevealOffsets(
+          metrics.containerWidth,
+          targetIndex,
+          metrics.cardWidth,
+          metrics.gap,
+          motionPattern
+        );
+        lockedOffsetRef.current = finalOffset;
+        applyOffset(finalOffset, false);
+      }
+
+      strip.dataset.transitioning = "false";
       onRollComplete?.();
     };
 
     strip.addEventListener("transitionend", handleTransitionEnd);
     return () => strip.removeEventListener("transitionend", handleTransitionEnd);
-  }, [isRolling, onRollComplete]);
+  }, [isRolling, onRollComplete, targetIndex, motionPattern, applyOffset]);
 
   useEffect(() => {
-    if (!isRevealed || items.length === 0) return undefined;
-
-    const strip = stripRef.current;
-    if (!strip) return undefined;
-
-    const applyFinalOffset = () => {
-      const metrics = measureRevealStripMetrics(strip, targetIndex);
-      if (!metrics) return;
-
-      const { finalOffset } = calculateRevealOffsets(
-        metrics.containerWidth,
-        targetIndex,
-        metrics.cardWidth,
-        metrics.gap
-      );
-      applyOffset(finalOffset, false);
-    };
-
-    applyFinalOffset();
-    const timer = window.setTimeout(applyFinalOffset, 520);
-
-    return () => window.clearTimeout(timer);
-  }, [isRevealed, items.length, targetIndex, applyOffset]);
+    if (!isRevealed || lockedOffsetRef.current == null) return undefined;
+    applyOffset(lockedOffsetRef.current, false);
+    return undefined;
+  }, [isRevealed, applyOffset]);
 
   useEffect(() => {
     if (!isIdle || items.length === 0 || isRolling || isRevealed) return undefined;
@@ -155,7 +167,7 @@ export default function MovieRevealStrip({
               key={`${movie.id}-${index}`}
               movie={movie}
               isHighlighted={isRevealed && index === targetIndex}
-              isBlurred={!isIdle && !isRevealed}
+              isBlurred={!isRevealed || index !== targetIndex}
             />
           ))}
         </div>

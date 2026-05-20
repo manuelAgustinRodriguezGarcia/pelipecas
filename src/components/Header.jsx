@@ -1,21 +1,50 @@
-﻿import { Clapperboard } from "lucide-react";
+﻿"use client";
+
+import { useState } from "react";
+import Image from "next/image";
+import { Heart } from "lucide-react";
+import LoveNoteModal from "./LoveNoteModal";
 import styles from "@/styles/components.module.scss";
 
 export default function Header() {
+  const [loveNoteOpen, setLoveNoteOpen] = useState(false);
+
   return (
-    <header className={styles.header}>
-      <div className={styles.headerContent}>
-        <div className={styles.logoRow}>
-          <div className={styles.logoIcon} aria-hidden="true">
-            <Clapperboard size={22} strokeWidth={1.5} />
+    <>
+      <header className={styles.header}>
+        <div className={styles.headerContent}>
+          <div className={styles.headerLogo} aria-hidden="true">
+            <Image
+              src="/logo.webp"
+              alt=""
+              width={71}
+              height={71}
+              priority
+              className={styles.headerLogoImg}
+              style={{ width: "auto", height: "100%" }}
+            />
           </div>
-          <h1 className="logo">Pelipecas</h1>
+          <div className={styles.headerText}>
+            <h1 className="logo">Pelipecas</h1>
+            <p className={`bodyText ${styles.subtitle}`}>
+              Tu cartelera personal de películas.
+            </p>
+          </div>
+          <button
+            type="button"
+            className={styles.headerHeartButton}
+            onClick={() => setLoveNoteOpen(true)}
+            aria-label="Para Pecas"
+          >
+            <Heart size={22} strokeWidth={1.75} aria-hidden="true" />
+          </button>
         </div>
-        <p className={`bodyText ${styles.subtitle}`}>
-          Tu cartelera personal de películas.
-        </p>
-      </div>
-    </header>
+      </header>
+
+      <LoveNoteModal
+        isOpen={loveNoteOpen}
+        onClose={() => setLoveNoteOpen(false)}
+      />
+    </>
   );
 }
-

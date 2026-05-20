@@ -7,7 +7,7 @@ import styles from "@/styles/components.module.scss";
 
 const DUPLICATE_MESSAGE = "Esta película ya está en tu lista.";
 
-export default function AddMovieForm({ onSelectMovie, onAddManual }) {
+export default function AddMovieForm({ onSelectMovie, onAddManual, sortControl = null }) {
   const [validationError, setValidationError] = useState("");
   const inputRef = useRef(null);
   const {
@@ -92,7 +92,9 @@ export default function AddMovieForm({ onSelectMovie, onAddManual }) {
       noValidate
     >
       <div className={styles.searchField}>
-        <div className={styles.formRow}>
+        <div
+          className={`${styles.formRow} ${sortControl ? styles.formRowWithSort : ""}`}
+        >
           <div className={styles.inputWrap}>
             <input
               ref={inputRef}
@@ -115,6 +117,7 @@ export default function AddMovieForm({ onSelectMovie, onAddManual }) {
               autoComplete="off"
             />
           </div>
+          {sortControl}
         </div>
 
         <MovieSearchResults

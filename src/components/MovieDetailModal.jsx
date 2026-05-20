@@ -1,17 +1,23 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, Star, Trash2, X } from "lucide-react";
+import { CircleCheck, Star, Trash2, X } from "lucide-react";
 import { useModalCloseAnimation } from "@/hooks/useModalCloseAnimation";
+import { isRatingsComplete } from "@/helpers/movieHelpers";
+import CollapsibleSection from "./CollapsibleSection";
 import MoviePoster from "./MoviePoster";
+import UserRatingPanel from "./UserRatingPanel";
 import styles from "@/styles/components.module.scss";
 
 export default function MovieDetailModal({
   movie,
   variant = "pending",
+  embedded = false,
+  isClosing: isClosingProp = false,
   onClose,
   onOpenMarkWatched,
-  onMoveToPending,
+  onRequestMoveToPending,
+  onRequestDeleteFromDetail,
   onDelete,
 }) {
   const dialogRef = useRef(null);
@@ -19,10 +25,20 @@ export default function MovieDetailModal({
   const [overview, setOverview] = useState(movie?.overview ?? null);
   const [voteAverage, setVoteAverage] = useState(movie?.voteAverage ?? null);
 
-  const { isVisible, isClosing, requestClose } = useModalCloseAnimation(
-    Boolean(movie),
-    onClose
-  );
+  const internalClose = useModalCloseAnimation(Boolean(movie) && !embedded, onClose);
+  const isVisible = embedded ? Boolean(movie) : internalClose.isVisible;
+  const isClosing = embedded ? isClosingProp : internalClose.isClosing;
+
+  const requestClose = (afterClose) => {
+    if (embedded) {
+      onClose?.(afterClose);
+      return;
+    }
+    internalClose.requestClose(afterClose);
+  };
+
+  const showUserRating =
+    variant === "watched" && isRatingsComplete(displayMovie?.ratings);
 
   useEffect(() => {
     if (!movie) return;
@@ -82,35 +98,31 @@ export default function MovieDetailModal({
   if (!isVisible || !displayMovie) return null;
 
   const handleMarkWatched = () => {
-    const id = displayMovie.id;
-    requestClose(() => onOpenMarkWatched?.(id));
+    onOpenMarkWatched?.(displayMovie.id);
   };
 
   const handleMoveToPending = () => {
-    const id = displayMovie.id;
-    requestClose(() => onMoveToPending?.(id));
+    onRequestMoveToPending?.(displayMovie.id);
   };
 
   const handleDelete = () => {
-    const id = displayMovie.id;
-    requestClose(() => onDelete?.(id));
+    if (variant === "watched") {
+      onRequestDeleteFromDetail?.(displayMovie.id);
+      return;
+    }
+    onDelete?.(displayMovie.id);
   };
 
-  return (
+  const dialog = (
     <div
-      className={`${styles.modalBackdrop} ${isClosing ? styles.modalBackdropClosing : ""}`}
-      onClick={() => requestClose()}
-      role="presentation"
+      ref={dialogRef}
+      className={`${styles.modalDialog} ${styles.detailModalDialog} ${isClosing ? styles.modalDialogClosing : ""}`}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="movie-detail-title"
+      tabIndex={-1}
+      onClick={(event) => event.stopPropagation()}
     >
-      <div
-        ref={dialogRef}
-        className={`${styles.modalDialog} ${styles.detailModalDialog} ${isClosing ? styles.modalDialogClosing : ""}`}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="movie-detail-title"
-        tabIndex={-1}
-        onClick={(event) => event.stopPropagation()}
-      >
         <button
           type="button"
           className={styles.modalClose}
@@ -141,12 +153,21 @@ export default function MovieDetailModal({
         </div>
 
         <div className={styles.detailModalBody}>
-          <section className={styles.detailModalSection}>
-            <h3 className={styles.detailSectionTitle}>Sinopsis</h3>
+          {showUserRating && (
+            <section className={styles.detailModalSection}>
+              <UserRatingPanel ratings={displayMovie.ratings} />
+            </section>
+          )}
+
+          <CollapsibleSection
+            key={`synopsis-${displayMovie.id}-${variant}`}
+            title="Sinopsis"
+            defaultOpen={variant === "pending"}
+          >
             <p className={styles.detailOverview}>
               {overview || "Sin descripción disponible."}
             </p>
-          </section>
+          </CollapsibleSection>
         </div>
 
         <div className={styles.detailModalActions}>
@@ -164,8 +185,8 @@ export default function MovieDetailModal({
               className={styles.btnPrimary}
               onClick={handleMarkWatched}
             >
-              <Check size={16} strokeWidth={2.5} aria-hidden="true" />
-              Marcar como vista
+              <CircleCheck size={16} strokeWidth={1.5} aria-hidden="true" />
+              <span className="sectionLabel">La vimos</span>
             </button>
           ) : (
             <button
@@ -177,7 +198,20 @@ export default function MovieDetailModal({
             </button>
           )}
         </div>
-      </div>
+    </div>
+  );
+
+  if (embedded) {
+    return dialog;
+  }
+
+  return (
+    <div
+      className={`${styles.modalBackdrop} ${isClosing ? styles.modalBackdropClosing : ""}`}
+      onClick={() => requestClose()}
+      role="presentation"
+    >
+      {dialog}
     </div>
   );
 }

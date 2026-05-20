@@ -1,5 +1,5 @@
-import WatchedPage from "@/components/WatchedPage";
+import { redirect } from "next/navigation";
 
-export default function VistasPage() {
-  return <WatchedPage />;
+export default function VistasRedirectPage() {
+  redirect("/las-vimos");
 }

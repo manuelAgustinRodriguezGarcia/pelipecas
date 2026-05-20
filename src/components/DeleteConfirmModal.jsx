@@ -2,35 +2,44 @@
 
 import { useEffect, useRef } from "react";
 import { Trash2, X } from "lucide-react";
+import { useModalCloseAnimation } from "@/hooks/useModalCloseAnimation";
 import styles from "@/styles/components.module.scss";
 
 export default function DeleteConfirmModal({ movie, onCancel, onConfirm }) {
   const dialogRef = useRef(null);
+  const { isVisible, isClosing, requestClose } = useModalCloseAnimation(
+    Boolean(movie),
+    onCancel
+  );
 
   useEffect(() => {
-    if (!movie) return undefined;
+    if (!isVisible || !movie) return undefined;
 
     const handleKeyDown = (event) => {
-      if (event.key === "Escape") onCancel();
+      if (event.key === "Escape") requestClose();
     };
 
     document.addEventListener("keydown", handleKeyDown);
     dialogRef.current?.focus();
 
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [movie, onCancel]);
+  }, [isVisible, movie, requestClose]);
 
-  if (!movie) return null;
+  if (!isVisible || !movie) return null;
+
+  const handleConfirm = () => {
+    requestClose(() => onConfirm?.());
+  };
 
   return (
     <div
-      className={styles.modalBackdrop}
-      onClick={onCancel}
+      className={`${styles.modalBackdrop} ${isClosing ? styles.modalBackdropClosing : ""}`}
+      onClick={() => requestClose()}
       role="presentation"
     >
       <div
         ref={dialogRef}
-        className={styles.modalDialog}
+        className={`${styles.modalDialog} ${isClosing ? styles.modalDialogClosing : ""}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="delete-modal-title"
@@ -40,7 +49,7 @@ export default function DeleteConfirmModal({ movie, onCancel, onConfirm }) {
         <button
           type="button"
           className={styles.modalClose}
-          onClick={onCancel}
+          onClick={() => requestClose()}
           aria-label="Cerrar"
         >
           <X size={18} strokeWidth={1.75} />
@@ -64,15 +73,11 @@ export default function DeleteConfirmModal({ movie, onCancel, onConfirm }) {
           <button
             type="button"
             className={styles.btnSecondary}
-            onClick={onCancel}
+            onClick={() => requestClose()}
           >
             Cancelar
           </button>
-          <button
-            type="button"
-            className={styles.btnDanger}
-            onClick={onConfirm}
-          >
+          <button type="button" className={styles.btnDanger} onClick={handleConfirm}>
             <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
             Eliminar
           </button>
