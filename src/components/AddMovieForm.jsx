@@ -116,19 +116,18 @@ export default function AddMovieForm({ onSelectMovie, onAddManual, sortControl =
               aria-controls="movie-search-results"
               autoComplete="off"
             />
+            <MovieSearchResults
+              id="movie-search-results"
+              results={results}
+              isSearching={isSearching}
+              error={searchError}
+              query={query}
+              onSelect={handleSelect}
+              onAddManual={handleManualAdd}
+            />
           </div>
           {sortControl}
         </div>
-
-        <MovieSearchResults
-          id="movie-search-results"
-          results={results}
-          isSearching={isSearching}
-          error={searchError}
-          query={query}
-          onSelect={handleSelect}
-          onAddManual={handleManualAdd}
-        />
       </div>
 
       {validationError && (

@@ -17,19 +17,19 @@ export default function manifest() {
     categories: ["entertainment"],
     icons: [
       {
-        src: "/icon192",
+        src: "/favicon.png",
         sizes: "192x192",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/icon512",
+        src: "/favicon.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/icon512",
+        src: "/favicon.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",

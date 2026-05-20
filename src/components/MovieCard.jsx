@@ -13,15 +13,10 @@ import UserRatingPanel from "./UserRatingPanel";
 function MovieMeta({ movie, variant }) {
   return (
     <div className={styles.cardMeta}>
-      {variant === "watched" && (
-        <>
-          <CinemaBadge variant="watched">Vista</CinemaBadge>
-          {movie.watchedAt && (
-            <span className={styles.cardDate}>
-              {formatWatchedDate(movie.watchedAt)}
-            </span>
-          )}
-        </>
+      {variant === "watched" && movie.watchedAt && (
+        <span className={styles.cardDate}>
+          {formatWatchedDate(movie.watchedAt)}
+        </span>
       )}
       {variant === "result" && <CinemaBadge variant="picked">Sorteada</CinemaBadge>}
       {movie.year && <span className={styles.cardYear}>{movie.year}</span>}

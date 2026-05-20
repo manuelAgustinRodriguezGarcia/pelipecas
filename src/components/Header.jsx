@@ -34,9 +34,12 @@ export default function Header() {
             type="button"
             className={styles.headerHeartButton}
             onClick={() => setLoveNoteOpen(true)}
-            aria-label="Para Pecas"
+            aria-label="Para Pecas — Te amo"
           >
-            <Heart size={22} strokeWidth={1.75} aria-hidden="true" />
+            <Heart size={18} strokeWidth={1.75} aria-hidden="true" />
+            <span className={`sectionLabel ${styles.headerHeartLabel}`}>
+              Te amo
+            </span>
           </button>
         </div>
       </header>

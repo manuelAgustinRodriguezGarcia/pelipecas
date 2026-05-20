@@ -6,8 +6,9 @@ export function buildPosterUrl(posterPath, size = "w185") {
 }
 
 export function extractYear(releaseDate) {
-  if (!releaseDate || releaseDate.length < 4) return null;
-  return releaseDate.slice(0, 4);
+  if (!releaseDate || String(releaseDate).length < 4) return null;
+  const parsed = Number.parseInt(String(releaseDate).slice(0, 4), 10);
+  return Number.isFinite(parsed) ? parsed : null;
 }
 
 export function mapTmdbMovie(movie) {

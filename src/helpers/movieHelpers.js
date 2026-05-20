@@ -104,6 +104,17 @@ export function generateMovieVisual(title) {
   };
 }
 
+/** Año de estreno (publicación TMDB), no fecha de alta en la lista. */
+export function coerceMovieYear(value) {
+  if (value == null || value === "") return null;
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const parsed = Number.parseInt(value.slice(0, 4), 10);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
 export function normalizeMovie(movie) {
   if (!movie || typeof movie !== "object") return null;
 
@@ -122,7 +133,7 @@ export function normalizeMovie(movie) {
     originalTitle: movie.originalTitle ?? null,
     overview: movie.overview ?? null,
     releaseDate,
-    year: movie.year ?? extractYear(releaseDate),
+    year: coerceMovieYear(movie.year) ?? extractYear(releaseDate),
     posterPath,
     posterUrl: movie.posterUrl ?? buildPosterUrl(posterPath),
     voteAverage: movie.voteAverage ?? null,

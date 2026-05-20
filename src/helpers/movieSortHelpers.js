@@ -1,4 +1,4 @@
-import { getUserAverageRating } from "@/helpers/movieHelpers";
+import { coerceMovieYear, getUserAverageRating } from "@/helpers/movieHelpers";
 
 export const PENDING_SORT_OPTIONS = [
   { value: "year-asc", label: "Año: más antiguas" },
@@ -21,7 +21,7 @@ function compareTitle(a, b) {
 }
 
 function getSortYear(movie) {
-  return typeof movie.year === "number" ? movie.year : null;
+  return coerceMovieYear(movie.year) ?? coerceMovieYear(movie.releaseDate);
 }
 
 function getSortRating(movie) {
