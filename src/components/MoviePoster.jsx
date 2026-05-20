@@ -12,12 +12,45 @@ export default function MoviePoster({ movie, size = "default", className = "" })
   const isLarge = size === "large";
   const isCardVertical = size === "cardVertical";
   const isFullWidth = size === "fullWidth";
-  const isWidePoster = isFullWidth || isCardVertical;
+  const isSuccessModal = size === "successModal";
+  const isWidePoster = isFullWidth || isCardVertical || isSuccessModal;
 
   const posterSrc = isWidePoster
-    ? buildPosterUrl(movie.posterPath, isCardVertical ? "w342" : "w500") ??
-      movie.posterUrl
+    ? buildPosterUrl(
+        movie.posterPath,
+        isCardVertical ? "w342" : isSuccessModal ? "w342" : "w500"
+      ) ?? movie.posterUrl
     : movie.posterUrl;
+
+  if (isSuccessModal) {
+    const altText = `Poster de ${movie.title}`;
+
+    if (posterSrc && !imageError) {
+      return (
+        <div className={`${styles.markWatchedSuccessPoster} ${className}`.trim()}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={posterSrc}
+            alt={altText}
+            className={styles.markWatchedSuccessPosterImg}
+            loading="lazy"
+            decoding="async"
+            onError={() => setImageError(true)}
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div
+        className={`${styles.markWatchedSuccessPoster} ${styles.markWatchedSuccessPosterFallback} ${styles[visual.posterVariant]} ${className}`.trim()}
+        role="img"
+        aria-label={altText}
+      >
+        <span>{visual.initials}</span>
+      </div>
+    );
+  }
 
   if (isCardVertical) {
     const altText = `Poster de ${movie.title}`;

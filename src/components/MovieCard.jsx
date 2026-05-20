@@ -37,17 +37,16 @@ export default function MovieCard({
   onSpinAgain,
 }) {
   const cardRef = useRef(null);
+  const isCardInteractive = Boolean(onSelect);
 
-  const handleCardClick = () => {
-    onSelect?.(movie);
-  };
+  const isMenuInteraction = (target) =>
+    target.closest(
+      `button, [role="menu"], .${styles.cardMenuPanel}, .${styles.cardMenuOverlay}, .${styles.cardActions}`
+    );
 
-  const handleCardKeyDown = (event) => {
-    if (!onSelect) return;
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      onSelect(movie);
-    }
+  const handleArticleClick = (event) => {
+    if (!onSelect || isMenuInteraction(event.target)) return;
+    onSelect(movie);
   };
 
   if (variant === "result") {
@@ -83,16 +82,12 @@ export default function MovieCard({
   return (
     <article
       ref={cardRef}
-      className={`${styles.movieCard} ${styles.movieCardResponsive} ${styles.movieCardWithMenu} ${styles.cardBodyWithMenu}`}
+      className={`${styles.movieCard} ${styles.movieCardResponsive} ${styles.movieCardWithMenu} ${styles.cardBodyWithMenu} ${isCardInteractive ? styles.movieCardClickable : ""}`}
+      onClick={isCardInteractive ? handleArticleClick : undefined}
+      aria-label={isCardInteractive ? `Ver detalles de ${movie.title}` : undefined}
     >
       <div className={styles.cardLayout}>
-        <div
-          className={`${styles.cardClickArea} ${onSelect ? styles.movieCardClickable : ""}`}
-          onClick={onSelect ? handleCardClick : undefined}
-          onKeyDown={onSelect ? handleCardKeyDown : undefined}
-          role={onSelect ? "button" : undefined}
-          tabIndex={onSelect ? 0 : undefined}
-        >
+        <div className={styles.cardClickArea}>
           <MoviePoster movie={movie} size="cardVertical" />
           <div className={styles.cardContentMain}>
             <h3 className={styles.cardTitle}>{movie.title}</h3>

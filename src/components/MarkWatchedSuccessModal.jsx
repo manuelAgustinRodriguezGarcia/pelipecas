@@ -1,16 +1,23 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { CircleCheck, X } from "lucide-react";
 import { useModalCloseAnimation } from "@/hooks/useModalCloseAnimation";
+import MoviePoster from "./MoviePoster";
+import StarDisplay from "./StarDisplay";
 import styles from "@/styles/components.module.scss";
 
-export default function MarkWatchedSuccessModal({ success, onClose }) {
+export default function MarkWatchedSuccessModal({
+  success,
+  embedded = false,
+  swapIn = false,
+  isClosing: isClosingProp = false,
+  onClose,
+}) {
   const dialogRef = useRef(null);
-  const { isVisible, isClosing, requestClose } = useModalCloseAnimation(
-    Boolean(success),
-    onClose
-  );
+  const internalClose = useModalCloseAnimation(Boolean(success) && !embedded, onClose);
+  const isVisible = embedded ? Boolean(success) : internalClose.isVisible;
+  const isClosing = embedded ? isClosingProp : internalClose.isClosing;
+  const requestClose = embedded ? onClose : internalClose.requestClose;
 
   useEffect(() => {
     if (!isVisible || !success) return undefined;
@@ -27,54 +34,68 @@ export default function MarkWatchedSuccessModal({ success, onClose }) {
 
   if (!isVisible || !success) return null;
 
+  const averageRating =
+    success.averageRating != null ? Number(success.averageRating) : null;
+
+  const dialog = (
+    <div
+      ref={dialogRef}
+      className={`${styles.modalDialog} ${styles.modalDialogSuccess} ${swapIn ? styles.modalDialogSwapIn : ""} ${isClosing ? styles.modalDialogClosing : ""}`}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="mark-watched-success-title"
+      tabIndex={-1}
+      onClick={(event) => event.stopPropagation()}
+    >
+      <MoviePoster
+        movie={{
+          title: success.title,
+          posterPath: success.posterPath,
+          posterUrl: success.posterUrl,
+        }}
+        size="successModal"
+      />
+
+      <p className={styles.markWatchedSuccessLabel}>Hoy vimos:</p>
+      <h2 id="mark-watched-success-title" className={styles.markWatchedSuccessMovie}>
+        {success.title}
+      </h2>
+
+      {averageRating != null && (
+        <>
+          <p className={styles.markWatchedSuccessLabel}>Y nos pareció:</p>
+          <div className={styles.markWatchedSuccessRating}>
+            <span className={styles.markWatchedSuccessScore}>
+              {averageRating.toFixed(1)}
+            </span>
+            <StarDisplay value={averageRating} size={22} />
+          </div>
+        </>
+      )}
+
+      <div className={styles.modalActions}>
+        <button
+          type="button"
+          className={styles.btnPrimary}
+          onClick={() => requestClose()}
+        >
+          Cerrar
+        </button>
+      </div>
+    </div>
+  );
+
+  if (embedded) {
+    return dialog;
+  }
+
   return (
     <div
       className={`${styles.modalBackdrop} ${styles.modalBackdropElevated} ${isClosing ? styles.modalBackdropClosing : ""}`}
       onClick={() => requestClose()}
       role="presentation"
     >
-      <div
-        ref={dialogRef}
-        className={`${styles.modalDialog} ${styles.modalDialogSuccess} ${isClosing ? styles.modalDialogClosing : ""}`}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="mark-watched-success-title"
-        tabIndex={-1}
-        onClick={(event) => event.stopPropagation()}
-      >
-        <button
-          type="button"
-          className={styles.modalClose}
-          onClick={() => requestClose()}
-          aria-label="Cerrar"
-        >
-          <X size={18} strokeWidth={1.75} />
-        </button>
-
-        <div className={styles.modalIconWrapSuccess} aria-hidden="true">
-          <CircleCheck size={24} strokeWidth={1.5} />
-        </div>
-
-        <h2 id="mark-watched-success-title" className={styles.modalTitle}>
-          ¡Listo!
-        </h2>
-
-        <p className={`bodyText ${styles.modalText}`}>
-          Guardamos las calificaciones de{" "}
-          <strong className={styles.modalMovieTitle}>{success.title}</strong> en
-          Las vimos.
-        </p>
-
-        <div className={styles.modalActions}>
-          <button
-            type="button"
-            className={styles.btnPrimary}
-            onClick={() => requestClose()}
-          >
-            Cerrar
-          </button>
-        </div>
-      </div>
+      {dialog}
     </div>
   );
 }

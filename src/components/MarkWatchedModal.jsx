@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CircleCheck, MessageCircleQuestion, Star, X } from "lucide-react";
+import { CircleCheck, Star, Wine, X } from "lucide-react";
 import {
   RATING_CATEGORIES,
   createEmptyRatings,
@@ -16,6 +16,7 @@ export default function MarkWatchedModal({
   movie,
   embedded = false,
   isClosing: isClosingProp = false,
+  isSwapOut = false,
   onClose,
   onConfirm,
 }) {
@@ -100,10 +101,16 @@ export default function MarkWatchedModal({
     onConfirm?.(movie.id, ratings);
   };
 
+  const closingClass = isClosing
+    ? isSwapOut
+      ? styles.modalDialogSwapOut
+      : styles.modalDialogClosing
+    : "";
+
   const dialog = (
     <div
       ref={dialogRef}
-      className={`${styles.modalDialog} ${styles.detailModalDialog} ${styles.markWatchedModalDialog} ${isClosing ? styles.modalDialogClosing : ""}`}
+      className={`${styles.modalDialog} ${styles.detailModalDialog} ${styles.markWatchedModalDialog} ${closingClass}`}
       role="dialog"
       aria-modal="true"
       aria-labelledby="mark-watched-title"
@@ -140,8 +147,10 @@ export default function MarkWatchedModal({
       </div>
 
       <h3 id="mark-watched-ratings-heading" className={styles.markWatchedPrompt}>
-        <MessageCircleQuestion size={18} strokeWidth={1.75} aria-hidden="true" />
-        ¿Cuál es tu opinión?
+        <Wine size={22} strokeWidth={1.75} aria-hidden="true" />
+        <span className={styles.markWatchedPromptQuote}>
+          &ldquo;La vida de un crítico&hellip;&rdquo;
+        </span>
       </h3>
 
       <div

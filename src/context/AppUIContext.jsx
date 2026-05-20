@@ -9,10 +9,15 @@ import DetailActionConfirmModal from "@/components/DetailActionConfirmModal";
 import MarkWatchedModal from "@/components/MarkWatchedModal";
 import MarkWatchedSuccessModal from "@/components/MarkWatchedSuccessModal";
 import MovieDetailModal from "@/components/MovieDetailModal";
-import { isRatingsComplete } from "@/helpers/movieHelpers";
+import {
+  getUserAverageRating,
+  isRatingsComplete,
+} from "@/helpers/movieHelpers";
 import styles from "@/styles/components.module.scss";
 
 const AppUIContext = createContext(null);
+
+const MARK_WATCHED_SWAP_MS = 300;
 
 export function AppUIProvider({ children }) {
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -20,8 +25,11 @@ export function AppUIProvider({ children }) {
   const [markWatchedTarget, setMarkWatchedTarget] = useState(null);
   const [detailActionConfirm, setDetailActionConfirm] = useState(null);
   const [markWatchedSuccess, setMarkWatchedSuccess] = useState(null);
+  const [markWatchedSwapping, setMarkWatchedSwapping] = useState(false);
 
-  const overlayOpen = Boolean(detailMovie || markWatchedTarget);
+  const overlayOpen = Boolean(
+    detailMovie || markWatchedTarget || markWatchedSuccess
+  );
   const {
     isVisible: overlayVisible,
     isClosing: overlayClosing,
@@ -29,6 +37,8 @@ export function AppUIProvider({ children }) {
   } = useModalCloseAnimation(overlayOpen, () => {
     setDetailMovie(null);
     setMarkWatchedTarget(null);
+    setMarkWatchedSuccess(null);
+    setMarkWatchedSwapping(false);
   });
 
   useLockBodyScroll(
@@ -55,20 +65,24 @@ export function AppUIProvider({ children }) {
   const handleConfirmMarkWatched = useCallback(
     (id, ratings) => {
       const movie = movies.find((item) => item.id === id);
-      requestOverlayClose(() => {
+      if (!movie || markWatchedSwapping) return;
+
+      setMarkWatchedSwapping(true);
+      window.setTimeout(() => {
         markAsWatched(id, ratings);
         clearPickedMovie();
-        if (movie) {
-          setMarkWatchedSuccess({ title: movie.title });
-        }
-      });
+        setMarkWatchedTarget(null);
+        setMarkWatchedSuccess({
+          title: movie.title,
+          averageRating: getUserAverageRating(ratings),
+          posterPath: movie.posterPath,
+          posterUrl: movie.posterUrl,
+        });
+        setMarkWatchedSwapping(false);
+      }, MARK_WATCHED_SWAP_MS);
     },
-    [movies, markAsWatched, clearPickedMovie, requestOverlayClose]
+    [movies, markAsWatched, clearPickedMovie, markWatchedSwapping]
   );
-
-  const handleCloseMarkWatchedSuccess = useCallback(() => {
-    setMarkWatchedSuccess(null);
-  }, []);
 
   const handleDeleteRequest = useCallback(
     (id) => {
@@ -162,20 +176,25 @@ export function AppUIProvider({ children }) {
         onCancel={handleCancelDetailActionConfirm}
         onConfirm={handleConfirmDetailAction}
       />
-      <MarkWatchedSuccessModal
-        success={markWatchedSuccess}
-        onClose={handleCloseMarkWatchedSuccess}
-      />
       {overlayVisible && (
         <div
-          className={`${styles.modalBackdrop} ${styles.modalBackdropHost} ${overlayClosing ? styles.modalBackdropClosing : ""}`}
-          onClick={handleOverlayBackdropClick}
+          className={`${styles.modalBackdrop} ${styles.modalBackdropHost} ${markWatchedSwapping ? styles.modalBackdropHostSwapping : ""} ${overlayClosing ? styles.modalBackdropClosing : ""}`}
+          onClick={markWatchedSwapping ? undefined : handleOverlayBackdropClick}
           role="presentation"
         >
-          {markWatchedTarget ? (
+          {markWatchedSuccess ? (
+            <MarkWatchedSuccessModal
+              embedded
+              swapIn
+              isClosing={overlayClosing}
+              success={markWatchedSuccess}
+              onClose={requestOverlayClose}
+            />
+          ) : markWatchedTarget ? (
             <MarkWatchedModal
               embedded
-              isClosing={overlayClosing}
+              isClosing={overlayClosing || markWatchedSwapping}
+              isSwapOut={markWatchedSwapping}
               movie={markWatchedTarget}
               onClose={requestOverlayClose}
               onConfirm={handleConfirmMarkWatched}
