@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useCallback, useRef, useState } from "react";
+import { fetchTmdbMovieDetails } from "@/helpers/fetchTmdbMovieDetails";
 import { useTmdbSearch } from "@/hooks/useTmdbSearch";
 import MovieSearchResults from "./MovieSearchResults";
 import styles from "@/styles/components.module.scss";
@@ -9,6 +10,7 @@ const DUPLICATE_MESSAGE = "Esta película ya está en tu lista.";
 
 export default function AddMovieForm({ onSelectMovie, onAddManual, sortControl = null }) {
   const [validationError, setValidationError] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
   const inputRef = useRef(null);
   const {
     query,
@@ -26,21 +28,39 @@ export default function AddMovieForm({ onSelectMovie, onAddManual, sortControl =
   }, [clearSearch]);
 
   const handleSelect = useCallback(
-    (tmdbMovie) => {
-      const result = onSelectMovie(tmdbMovie);
+    async (tmdbMovie) => {
+      if (isAdding) return;
 
-      if (!result.success) {
-        setValidationError(
-          result.error === "duplicate"
-            ? DUPLICATE_MESSAGE
-            : "No se pudo agregar la película."
-        );
-        return;
+      setValidationError("");
+      setIsAdding(true);
+
+      try {
+        let movieData = tmdbMovie;
+
+        if (tmdbMovie?.tmdbId) {
+          const enriched = await fetchTmdbMovieDetails(tmdbMovie.tmdbId);
+          if (enriched) {
+            movieData = { ...tmdbMovie, ...enriched };
+          }
+        }
+
+        const result = onSelectMovie(movieData);
+
+        if (!result.success) {
+          setValidationError(
+            result.error === "duplicate"
+              ? DUPLICATE_MESSAGE
+              : "No se pudo agregar la película."
+          );
+          return;
+        }
+
+        handleClear();
+      } finally {
+        setIsAdding(false);
       }
-
-      handleClear();
     },
-    [onSelectMovie, handleClear]
+    [onSelectMovie, handleClear, isAdding]
   );
 
   const handleManualAdd = useCallback(
@@ -63,11 +83,11 @@ export default function AddMovieForm({ onSelectMovie, onAddManual, sortControl =
     [onAddManual, handleClear]
   );
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (results.length > 0 && !isSearching) {
-      handleSelect(results[0]);
+    if (results.length > 0 && !isSearching && !isAdding) {
+      await handleSelect(results[0]);
       return;
     }
 
@@ -115,6 +135,7 @@ export default function AddMovieForm({ onSelectMovie, onAddManual, sortControl =
               aria-expanded={query.trim().length >= 2}
               aria-controls="movie-search-results"
               autoComplete="off"
+              disabled={isAdding}
             />
             <MovieSearchResults
               id="movie-search-results"

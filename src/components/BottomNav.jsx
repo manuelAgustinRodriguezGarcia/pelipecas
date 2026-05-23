@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Clapperboard, CircleCheck, Settings, Ticket } from "lucide-react";
+import { Clapperboard, CircleCheck, Popcorn, Settings } from "lucide-react";
 import { useSectionNavigation } from "@/context/SectionNavigationContext";
 import styles from "@/styles/components.module.scss";
 
 const NAV_ITEMS = [
   { href: "/para-ver", label: "Para ver", Icon: Clapperboard },
   { href: "/las-vimos", label: "Las vimos", Icon: CircleCheck },
-  { href: "/hoy-vemos", label: "Hoy vemos", Icon: Ticket },
+  { href: "/hoy-vemos", label: "Hoy vemos", Icon: Popcorn },
   { href: "/ajustes", label: "Ajustes", Icon: Settings },
 ];
 

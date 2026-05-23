@@ -7,10 +7,16 @@ import MovieCardActionMenu from "./MovieCardActionMenu";
 import MovieCardActions from "./MovieCardActions";
 import MoviePoster from "./MoviePoster";
 import styles from "@/styles/components.module.scss";
-import { formatWatchedDate, isRatingsComplete } from "@/helpers/movieHelpers";
+import {
+  formatRuntime,
+  formatWatchedDate,
+  isRatingsComplete,
+} from "@/helpers/movieHelpers";
 import UserRatingPanel from "./UserRatingPanel";
 
 function MovieMeta({ movie, variant }) {
+  const runtimeLabel = formatRuntime(movie.runtime);
+
   return (
     <div className={styles.cardMeta}>
       {variant === "watched" && movie.watchedAt && (
@@ -22,6 +28,9 @@ function MovieMeta({ movie, variant }) {
       {movie.year && <span className={styles.cardYear}>{movie.year}</span>}
       {movie.voteAverage != null && (
         <span className={styles.cardRating}>TMDB {movie.voteAverage.toFixed(1)}</span>
+      )}
+      {runtimeLabel && (
+        <span className={styles.cardRuntime}>{runtimeLabel}</span>
       )}
     </div>
   );

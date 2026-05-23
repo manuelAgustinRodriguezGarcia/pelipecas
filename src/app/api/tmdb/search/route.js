@@ -1,6 +1,43 @@
-import { mapTmdbMovie } from "@/helpers/tmdbHelpers";
+import {
+  enrichArgentineMovieTitles,
+  mergeMultiLocaleSearchResults,
+} from "@/helpers/tmdbHelpers";
 
 const TMDB_SEARCH_URL = "https://api.themoviedb.org/3/search/movie";
+
+const SEARCH_LOCALES = [
+  { language: "es-AR", region: "AR" },
+  { language: "es-MX", region: "MX" },
+  { language: "en-US", region: "US" },
+];
+
+async function fetchSearchForLocale(query, locale, token) {
+  const url = new URL(TMDB_SEARCH_URL);
+  url.searchParams.set("query", query);
+  url.searchParams.set("language", locale.language);
+  url.searchParams.set("page", "1");
+  url.searchParams.set("include_adult", "false");
+  url.searchParams.set("region", locale.region);
+
+  const response = await fetch(url.toString(), {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+    next: { revalidate: 3600 },
+  });
+
+  if (!response.ok) {
+    return { locale: locale.language, results: [], ok: false };
+  }
+
+  const data = await response.json();
+  return {
+    locale: locale.language,
+    results: data.results ?? [],
+    ok: true,
+  };
+}
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -19,33 +56,37 @@ export async function GET(request) {
     );
   }
 
-  const url = new URL(TMDB_SEARCH_URL);
-  url.searchParams.set("query", query);
-  url.searchParams.set("language", "es-AR");
-  url.searchParams.set("page", "1");
-  url.searchParams.set("include_adult", "false");
-  url.searchParams.set("region", "AR");
-
   try {
-    const response = await fetch(url.toString(), {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
-      next: { revalidate: 3600 },
-    });
+    const localeResults = await Promise.all(
+      SEARCH_LOCALES.map((locale) => fetchSearchForLocale(query, locale, token))
+    );
 
-    if (!response.ok) {
+    const anyOk = localeResults.some((entry) => entry.ok);
+
+    if (!anyOk) {
       return Response.json(
         { error: "No pudimos buscar películas en este momento." },
-        { status: response.status }
+        { status: 502 }
       );
     }
 
-    const data = await response.json();
-    const results = (data.results ?? [])
-      .slice(0, 5)
-      .map(mapTmdbMovie);
+    const merged = mergeMultiLocaleSearchResults(localeResults);
+
+    const results = await enrichArgentineMovieTitles(merged, async (movieId) => {
+      const url = new URL(`https://api.themoviedb.org/3/movie/${movieId}`);
+      url.searchParams.set("language", "es-AR");
+
+      const response = await fetch(url.toString(), {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+        next: { revalidate: 3600 },
+      });
+
+      if (!response.ok) return null;
+      return response.json();
+    });
 
     return Response.json({ results });
   } catch {

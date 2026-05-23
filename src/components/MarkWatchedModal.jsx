@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CircleCheck, Star, Wine, X } from "lucide-react";
+import { fetchTmdbMovieDetails } from "@/helpers/fetchTmdbMovieDetails";
 import {
   RATING_CATEGORIES,
   createEmptyRatings,
@@ -67,18 +68,11 @@ export default function MarkWatchedModal({
     const controller = new AbortController();
 
     async function loadTmdbDetails() {
-      try {
-        const response = await fetch(`/api/tmdb/movie?movieId=${movie.tmdbId}`, {
-          signal: controller.signal,
-        });
-        if (cancelled || !response.ok) return;
+      const detail = await fetchTmdbMovieDetails(movie.tmdbId, controller.signal);
+      if (cancelled || !detail) return;
 
-        const detailData = await response.json();
-        if (detailData.movie?.voteAverage != null) {
-          setVoteAverage(detailData.movie.voteAverage);
-        }
-      } catch {
-        // Keep local data on fetch failure
+      if (detail.voteAverage != null) {
+        setVoteAverage(detail.voteAverage);
       }
     }
 

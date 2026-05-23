@@ -36,6 +36,9 @@ function serializeMovieForExport(movie) {
     posterPath: movie.posterPath,
     posterUrl: movie.posterUrl,
     voteAverage: movie.voteAverage,
+    originalLanguage: movie.originalLanguage ?? null,
+    runtime: movie.runtime ?? null,
+    watchProviders: movie.watchProviders,
     ratings: movie.ratings,
   };
 }

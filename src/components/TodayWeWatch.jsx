@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Clapperboard, Plus, Ticket } from "lucide-react";
+import { Clapperboard, Plus, Popcorn } from "lucide-react";
 import {
   REVEAL_MOTION_PATTERNS,
   buildIdlePreviewItems,
@@ -145,9 +145,9 @@ export default function TodayWeWatch({
         onClick={handlePickMovie}
         disabled={isRolling}
       >
-        <Ticket size={18} strokeWidth={1.75} aria-hidden="true" />
+        <Popcorn size={18} strokeWidth={1.75} aria-hidden="true" />
         <span className="sectionLabel">
-          {isRolling ? "Preparando la función…" : "Sortear película"}
+          {isRolling ? "Preparando la función…" : "Elegir película"}
         </span>
       </button>
 

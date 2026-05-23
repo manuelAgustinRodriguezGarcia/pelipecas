@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CircleCheck, Star, Ticket, X } from "lucide-react";
+import { CircleCheck, Star, X } from "lucide-react";
+import { fetchTmdbMovieDetails } from "@/helpers/fetchTmdbMovieDetails";
+import { formatRuntime } from "@/helpers/movieHelpers";
 import { useLockBodyScroll } from "@/hooks/useLockBodyScroll";
 import { useModalCloseAnimation } from "@/hooks/useModalCloseAnimation";
 import CollapsibleSection from "./CollapsibleSection";
+import DetailWatchProviders from "./DetailWatchProviders";
 import MoviePoster from "./MoviePoster";
 import styles from "@/styles/components.module.scss";
 
@@ -16,9 +19,14 @@ export default function MovieRevealModal({
   onPickAgain,
 }) {
   const dialogRef = useRef(null);
+  const detailsLoadedForRef = useRef(null);
   const [displayMovie, setDisplayMovie] = useState(movie);
   const [overview, setOverview] = useState(movie?.overview ?? null);
   const [voteAverage, setVoteAverage] = useState(movie?.voteAverage ?? null);
+  const [runtime, setRuntime] = useState(movie?.runtime ?? null);
+  const [watchProviders, setWatchProviders] = useState(
+    movie?.watchProviders ?? undefined
+  );
 
   const { isVisible, isClosing, requestClose } = useModalCloseAnimation(
     isOpen,
@@ -32,6 +40,8 @@ export default function MovieRevealModal({
     setDisplayMovie(movie);
     setOverview(movie.overview ?? null);
     setVoteAverage(movie.voteAverage ?? null);
+    setRuntime(movie.runtime ?? null);
+    setWatchProviders(movie.watchProviders ?? undefined);
   }, [movie]);
 
   useEffect(() => {
@@ -48,30 +58,45 @@ export default function MovieRevealModal({
   }, [isVisible, displayMovie, requestClose]);
 
   useEffect(() => {
-    if (!displayMovie?.tmdbId) return undefined;
-    if (displayMovie.overview && displayMovie.voteAverage != null) return undefined;
+    detailsLoadedForRef.current = null;
+  }, [movie?.id]);
+
+  useEffect(() => {
+    if (!isVisible || !displayMovie?.tmdbId) return undefined;
+    if (detailsLoadedForRef.current === displayMovie.id) return undefined;
 
     let cancelled = false;
     const controller = new AbortController();
 
     async function loadTmdbDetails() {
-      try {
-        const response = await fetch(
-          `/api/tmdb/movie?movieId=${displayMovie.tmdbId}`,
-          { signal: controller.signal }
-        );
-        if (cancelled || !response.ok) return;
+      const detail = await fetchTmdbMovieDetails(
+        displayMovie.tmdbId,
+        controller.signal
+      );
+      if (cancelled) return;
 
-        const detailData = await response.json();
-        if (detailData.movie?.overview) {
-          setOverview(detailData.movie.overview);
-        }
-        if (detailData.movie?.voteAverage != null) {
-          setVoteAverage(detailData.movie.voteAverage);
-        }
-      } catch {
-        // Keep local data on fetch failure
+      detailsLoadedForRef.current = displayMovie.id;
+
+      if (!detail) {
+        setWatchProviders((current) =>
+          current === undefined ? [] : current
+        );
+        return;
       }
+
+      if (detail.overview) {
+        setOverview(detail.overview);
+      }
+      if (detail.voteAverage != null) {
+        setVoteAverage(detail.voteAverage);
+      }
+      if (detail.runtime != null) {
+        setRuntime(detail.runtime);
+      }
+      setWatchProviders((current) => {
+        if (current !== undefined) return current;
+        return Array.isArray(detail.watchProviders) ? detail.watchProviders : [];
+      });
     }
 
     loadTmdbDetails();
@@ -80,7 +105,7 @@ export default function MovieRevealModal({
       cancelled = true;
       controller.abort();
     };
-  }, [displayMovie]);
+  }, [isVisible, displayMovie?.id, displayMovie?.tmdbId]);
 
   if (!isVisible || !displayMovie) return null;
 
@@ -92,6 +117,8 @@ export default function MovieRevealModal({
     onPickAgain?.();
     requestClose();
   };
+
+  const runtimeLabel = formatRuntime(runtime ?? displayMovie.runtime);
 
   return (
     <div
@@ -120,6 +147,7 @@ export default function MovieRevealModal({
         <div className={styles.detailModalHero}>
           <MoviePoster movie={displayMovie} size="fullWidth" />
           <div className={styles.detailModalHeader}>
+            <p className={styles.revealSelectionLabel}>Selección</p>
             <h2 id="movie-reveal-title" className={styles.detailModalTitle}>
               {displayMovie.title}
             </h2>
@@ -133,6 +161,9 @@ export default function MovieRevealModal({
                   TMDB {voteAverage.toFixed(1)}
                 </span>
               )}
+              {runtimeLabel && (
+                <span className={styles.detailModalRuntime}>{runtimeLabel}</span>
+              )}
             </div>
           </div>
         </div>
@@ -140,13 +171,17 @@ export default function MovieRevealModal({
         <div className={styles.detailModalBody}>
           <CollapsibleSection
             key={`synopsis-reveal-${displayMovie.id}`}
-            title="Sinopsis"
+            title="SINOPSIS"
             defaultOpen
           >
             <p className={styles.detailOverview}>
               {overview || "Sin descripción disponible."}
             </p>
           </CollapsibleSection>
+
+          {displayMovie.tmdbId && watchProviders !== undefined && (
+            <DetailWatchProviders providers={watchProviders} />
+          )}
         </div>
 
         <div
@@ -157,8 +192,7 @@ export default function MovieRevealModal({
             className={styles.btnSecondary}
             onClick={handlePickAgain}
           >
-            <Ticket size={16} strokeWidth={1.75} aria-hidden="true" />
-            Sortear de nuevo
+            Elegir otra
           </button>
           <button
             type="button"
@@ -166,7 +200,7 @@ export default function MovieRevealModal({
             onClick={handleMarkWatched}
           >
             <CircleCheck size={16} strokeWidth={1.5} aria-hidden="true" />
-            <span className="sectionLabel">La vimos</span>
+            <span className="sectionLabel">Marcar como vista</span>
           </button>
         </div>
       </div>

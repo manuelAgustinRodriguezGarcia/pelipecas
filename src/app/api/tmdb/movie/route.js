@@ -1,4 +1,12 @@
-import { mapTmdbMovie } from "@/helpers/tmdbHelpers";
+import { mapTmdbMovieDetails } from "@/helpers/tmdbHelpers";
+
+const TMDB_FETCH_OPTIONS = (token) => ({
+  headers: {
+    Authorization: `Bearer ${token}`,
+    Accept: "application/json",
+  },
+  next: { revalidate: 3600 },
+});
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -17,28 +25,42 @@ export async function GET(request) {
     );
   }
 
-  const url = new URL(`https://api.themoviedb.org/3/movie/${movieId}`);
-  url.searchParams.set("language", "es-AR");
+  const movieUrl = new URL(`https://api.themoviedb.org/3/movie/${movieId}`);
+  movieUrl.searchParams.set("language", "es-AR");
+  movieUrl.searchParams.set("append_to_response", "images");
+
+  const watchProvidersUrl = new URL(
+    `https://api.themoviedb.org/3/movie/${movieId}/watch/providers`
+  );
 
   try {
-    const response = await fetch(url.toString(), {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
-      next: { revalidate: 3600 },
-    });
+    const [movieResponse, watchProvidersResponse] = await Promise.all([
+      fetch(movieUrl.toString(), TMDB_FETCH_OPTIONS(token)),
+      fetch(watchProvidersUrl.toString(), TMDB_FETCH_OPTIONS(token)),
+    ]);
 
-    if (!response.ok) {
+    if (!movieResponse.ok) {
       return Response.json(
         { error: "No pudimos cargar los detalles de la película." },
-        { status: response.status }
+        { status: movieResponse.status }
       );
     }
 
-    const data = await response.json();
+    const movieData = await movieResponse.json();
+    let watchProvidersPayload = null;
 
-    return Response.json({ movie: mapTmdbMovie(data) });
+    if (watchProvidersResponse.ok) {
+      watchProvidersPayload = await watchProvidersResponse.json();
+    }
+
+    const imagesPayload = movieData.images ?? { posters: [] };
+    const movie = mapTmdbMovieDetails(
+      movieData,
+      imagesPayload,
+      watchProvidersPayload
+    );
+
+    return Response.json({ movie });
   } catch {
     return Response.json(
       { error: "No pudimos cargar los detalles de la película." },

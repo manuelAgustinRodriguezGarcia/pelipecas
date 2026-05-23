@@ -1,4 +1,8 @@
-import { buildPosterUrl, extractYear } from "@/helpers/tmdbHelpers";
+import {
+  buildLogoUrl,
+  buildPosterUrl,
+  extractYear,
+} from "@/helpers/tmdbHelpers";
 
 export const STORAGE_KEY = "pelipecas_movies";
 export const LEGACY_SEED_MIGRATION_KEY = "pelipecas_seed_removed_v1";
@@ -27,12 +31,15 @@ const POSTER_VARIANTS = [
 const TMDB_DEFAULTS = {
   tmdbId: null,
   originalTitle: null,
+  originalLanguage: null,
   overview: null,
   releaseDate: null,
   year: null,
   posterPath: null,
   posterUrl: null,
   voteAverage: null,
+  runtime: null,
+  watchProviders: undefined,
 };
 
 export const RATING_CATEGORIES = [
@@ -128,6 +135,38 @@ export function coerceMovieYear(value) {
   return null;
 }
 
+export function formatRuntime(runtime) {
+  if (runtime == null) return null;
+  const minutes = Math.round(Number(runtime));
+  if (!Number.isFinite(minutes) || minutes <= 0) return null;
+
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+
+  if (hours === 0) return `${mins}m`;
+  if (mins === 0) return `${hours}h`;
+  return `${hours}h ${mins}m`;
+}
+
+function normalizeWatchProviders(watchProviders) {
+  if (!Array.isArray(watchProviders)) return undefined;
+  return watchProviders
+    .map((provider) => {
+      if (!provider || typeof provider !== "object") return null;
+      const providerId = provider.providerId ?? provider.provider_id;
+      if (providerId == null) return null;
+      const logoPath = provider.logoPath ?? provider.logo_path ?? null;
+      return {
+        providerId,
+        providerName:
+          provider.providerName ?? provider.provider_name ?? "Proveedor",
+        logoPath,
+        logoUrl: provider.logoUrl ?? buildLogoUrl(logoPath),
+      };
+    })
+    .filter(Boolean);
+}
+
 export function normalizeMovie(movie) {
   if (!movie || typeof movie !== "object") return null;
 
@@ -144,12 +183,18 @@ export function normalizeMovie(movie) {
       typeof movie.timesPicked === "number" ? movie.timesPicked : 0,
     tmdbId: movie.tmdbId ?? null,
     originalTitle: movie.originalTitle ?? null,
+    originalLanguage: movie.originalLanguage ?? null,
     overview: movie.overview ?? null,
     releaseDate,
     year: coerceMovieYear(movie.year) ?? extractYear(releaseDate),
     posterPath,
     posterUrl: movie.posterUrl ?? buildPosterUrl(posterPath),
     voteAverage: movie.voteAverage ?? null,
+    runtime:
+      typeof movie.runtime === "number" && movie.runtime > 0
+        ? Math.round(movie.runtime)
+        : null,
+    watchProviders: normalizeWatchProviders(movie.watchProviders),
     ratings: normalizeRatings(movie.ratings),
   };
 }
@@ -178,12 +223,15 @@ export function createMovieFromTmdb(tmdbData, status = "pending") {
     timesPicked: 0,
     tmdbId: tmdbData.tmdbId,
     originalTitle: tmdbData.originalTitle,
+    originalLanguage: tmdbData.originalLanguage ?? null,
     overview: tmdbData.overview,
     releaseDate: tmdbData.releaseDate,
     year: tmdbData.year,
     posterPath: tmdbData.posterPath,
     posterUrl: tmdbData.posterUrl,
     voteAverage: tmdbData.voteAverage,
+    runtime: tmdbData.runtime ?? null,
+    watchProviders: tmdbData.watchProviders,
   });
 }
 
