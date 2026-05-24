@@ -2,11 +2,15 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Film } from "lucide-react";
+import { Clapperboard, Film } from "lucide-react";
 import { generateMovieVisual } from "@/helpers/movieHelpers";
 import styles from "@/styles/components.module.scss";
 
-export default function MovieSearchResultItem({ movie, onSelect }) {
+export default function MovieSearchResultItem({
+  movie,
+  isInPendingList = false,
+  onSelect,
+}) {
   const [imageError, setImageError] = useState(false);
   const visual = generateMovieVisual(movie.title);
   const showOriginal =
@@ -17,9 +21,13 @@ export default function MovieSearchResultItem({ movie, onSelect }) {
   return (
     <button
       type="button"
-      className={styles.searchResultItem}
+      className={`${styles.searchResultItem} ${isInPendingList ? styles.searchResultItemInList : ""}`.trim()}
       onClick={() => onSelect(movie)}
-      aria-label={`Agregar ${movie.title}`}
+      aria-label={
+        isInPendingList
+          ? `${movie.title}, ya está en para ver`
+          : `Agregar ${movie.title}`
+      }
     >
       <div className={styles.searchResultPoster}>
         {showPoster ? (
@@ -57,6 +65,16 @@ export default function MovieSearchResultItem({ movie, onSelect }) {
           <p className={styles.searchResultOverview}>{movie.overview}</p>
         )}
       </div>
+
+      {isInPendingList && (
+        <span
+          className={styles.searchResultInListBadge}
+          title="Ya está en para ver"
+          aria-hidden="true"
+        >
+          <Clapperboard size={20} strokeWidth={1.5} />
+        </span>
+      )}
     </button>
   );
 }

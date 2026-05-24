@@ -30,6 +30,7 @@ export default function MovieSortDropdown({
   options = PENDING_SORT_OPTIONS,
   sortIcons = MOVIE_SORT_ICONS,
   getOption = getPendingSortOption,
+  compact = false,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
@@ -64,29 +65,72 @@ export default function MovieSortDropdown({
   };
 
   return (
-    <div className={styles.sortDropdown} ref={containerRef}>
-      <span className={`sectionLabel ${styles.sortDropdownLegend}`}>
-        Ordenar por
-      </span>
-      <button
-        type="button"
-        className={styles.sortDropdownTrigger}
-        onClick={() => setIsOpen((open) => !open)}
-        aria-haspopup="listbox"
-        aria-expanded={isOpen}
-        aria-controls={listboxId}
-      >
-        <span className={styles.sortDropdownTriggerMain}>
-          <SelectedIcon size={16} strokeWidth={1.75} aria-hidden="true" />
-          <span className={styles.sortDropdownValue}>{selected.label}</span>
+    <div
+      className={`${styles.sortDropdown} ${compact ? styles.sortDropdownCompact : ""}`.trim()}
+      ref={containerRef}
+    >
+      {!compact && (
+        <span className={`sectionLabel ${styles.sortDropdownLegend}`}>
+          Ordenar por
         </span>
-        <ChevronDown
-          size={18}
-          strokeWidth={1.75}
-          aria-hidden="true"
-          className={`${styles.sortDropdownChevron} ${isOpen ? styles.sortDropdownChevronOpen : ""}`}
-        />
-      </button>
+      )}
+      {compact ? (
+        <div className={styles.sortDropdownCompactRow}>
+          <span className={`sectionLabel ${styles.sortDropdownCompactLegend}`}>
+            ORDEN
+          </span>
+          <button
+            type="button"
+            className={styles.sortDropdownTrigger}
+            onClick={() => setIsOpen((open) => !open)}
+            aria-haspopup="listbox"
+            aria-expanded={isOpen}
+            aria-controls={listboxId}
+            aria-label={`Ordenar por: ${selected.label}`}
+          >
+            <span className={styles.sortDropdownTriggerMain}>
+              <SelectedIcon
+                className={styles.sortDropdownOptionIcon}
+                size={14}
+                strokeWidth={1.75}
+                aria-hidden="true"
+              />
+              <span className={styles.sortDropdownValue}>{selected.label}</span>
+            </span>
+            <ChevronDown
+              size={16}
+              strokeWidth={1.75}
+              aria-hidden="true"
+              className={`${styles.sortDropdownChevron} ${isOpen ? styles.sortDropdownChevronOpen : ""}`}
+            />
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          className={styles.sortDropdownTrigger}
+          onClick={() => setIsOpen((open) => !open)}
+          aria-haspopup="listbox"
+          aria-expanded={isOpen}
+          aria-controls={listboxId}
+        >
+          <span className={styles.sortDropdownTriggerMain}>
+            <SelectedIcon
+              className={styles.sortDropdownOptionIcon}
+              size={16}
+              strokeWidth={1.75}
+              aria-hidden="true"
+            />
+            <span className={styles.sortDropdownValue}>{selected.label}</span>
+          </span>
+          <ChevronDown
+            size={18}
+            strokeWidth={1.75}
+            aria-hidden="true"
+            className={`${styles.sortDropdownChevron} ${isOpen ? styles.sortDropdownChevronOpen : ""}`}
+          />
+        </button>
+      )}
 
       {isOpen && (
         <ul

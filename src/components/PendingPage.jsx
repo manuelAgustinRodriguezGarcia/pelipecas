@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Armchair, Plus, Ticket } from "lucide-react";
+import { Armchair, Clapperboard, Plus } from "lucide-react";
 import { useAppUI } from "@/context/AppUIContext";
 import { useMoviesContext } from "@/context/MoviesContext";
 import AddMovieForm from "@/components/AddMovieForm";
@@ -18,7 +18,8 @@ import appStyles from "@/styles/app.module.scss";
 export default function PendingPage() {
   const router = useRouter();
   const { onSelectMovie, onOpenMarkWatched, onDelete } = useAppUI();
-  const { pendingMovies, addMovieFromTmdb, addMovieManually } = useMoviesContext();
+  const { pendingMovies, addMovieFromTmdb, addMovieManually, deleteMovie } =
+    useMoviesContext();
   const [sortBy, setSortBy] = useState(DEFAULT_PENDING_SORT);
 
   const sortedPendingMovies = useMemo(
@@ -36,30 +37,32 @@ export default function PendingPage() {
 
   return (
     <section className={appStyles.section} aria-label="Para ver">
-      <div className={appStyles.sectionHeader}>
-        <h2 className={appStyles.sectionTitle}>Para ver</h2>
-        <p className={`bodyText ${appStyles.sectionSubtitle}`}>
-          Anotá las películas que tenés ganas de ver.
-        </p>
+      <div className={appStyles.pendingStickyBar}>
+        <AddMovieForm
+          formClassName={appStyles.pendingStickyForm}
+          pendingMovies={pendingMovies}
+          onSelectMovie={addMovieFromTmdb}
+          onAddManual={addMovieManually}
+          onRemoveFromPending={deleteMovie}
+        />
+
+        {pendingMovies.length > 0 && (
+          <div className={appStyles.listToolbar}>
+            <span className={`sectionLabel ${appStyles.countBadge}`}>
+              <Clapperboard size={14} strokeWidth={1.5} aria-hidden="true" />
+              {pendingMovies.length}{" "}
+              {pendingMovies.length === 1
+                ? "película para ver"
+                : "películas para ver"}
+            </span>
+            <MovieSortDropdown
+              compact
+              value={sortBy}
+              onChange={setSortBy}
+            />
+          </div>
+        )}
       </div>
-
-      <AddMovieForm
-        onSelectMovie={addMovieFromTmdb}
-        onAddManual={addMovieManually}
-        sortControl={<MovieSortDropdown value={sortBy} onChange={setSortBy} />}
-      />
-
-      {pendingMovies.length > 0 && (
-        <div className={appStyles.countRow}>
-          <span className={`sectionLabel ${appStyles.countBadge}`}>
-            <Ticket size={14} strokeWidth={1.5} aria-hidden="true" />
-            {pendingMovies.length}{" "}
-            {pendingMovies.length === 1
-              ? "película para ver"
-              : "películas para ver"}
-          </span>
-        </div>
-      )}
 
       {pendingMovies.length === 0 ? (
         <EmptyState

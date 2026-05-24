@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { CircleCheck, Star, X } from "lucide-react";
-import { fetchTmdbMovieDetails } from "@/helpers/fetchTmdbMovieDetails";
 import { formatRuntime } from "@/helpers/movieHelpers";
 import { useLockBodyScroll } from "@/hooks/useLockBodyScroll";
 import { useModalCloseAnimation } from "@/hooks/useModalCloseAnimation";
+import { useTmdbMovieDetails } from "@/hooks/useTmdbMovieDetails";
 import CollapsibleSection from "./CollapsibleSection";
 import DetailWatchProviders from "./DetailWatchProviders";
 import MoviePoster from "./MoviePoster";
@@ -19,14 +19,6 @@ export default function MovieRevealModal({
   onPickAgain,
 }) {
   const dialogRef = useRef(null);
-  const detailsLoadedForRef = useRef(null);
-  const [displayMovie, setDisplayMovie] = useState(movie);
-  const [overview, setOverview] = useState(movie?.overview ?? null);
-  const [voteAverage, setVoteAverage] = useState(movie?.voteAverage ?? null);
-  const [runtime, setRuntime] = useState(movie?.runtime ?? null);
-  const [watchProviders, setWatchProviders] = useState(
-    movie?.watchProviders ?? undefined
-  );
 
   const { isVisible, isClosing, requestClose } = useModalCloseAnimation(
     isOpen,
@@ -35,17 +27,17 @@ export default function MovieRevealModal({
 
   useLockBodyScroll(isVisible);
 
-  useEffect(() => {
-    if (!movie) return;
-    setDisplayMovie(movie);
-    setOverview(movie.overview ?? null);
-    setVoteAverage(movie.voteAverage ?? null);
-    setRuntime(movie.runtime ?? null);
-    setWatchProviders(movie.watchProviders ?? undefined);
-  }, [movie]);
+  const {
+    overview,
+    voteAverage,
+    runtime,
+    watchProviders,
+    runtimeLoading,
+    watchProvidersLoading,
+  } = useTmdbMovieDetails(movie, isVisible);
 
   useEffect(() => {
-    if (!isVisible || !displayMovie) return undefined;
+    if (!isVisible || !movie) return undefined;
 
     const handleKeyDown = (event) => {
       if (event.key === "Escape") requestClose();
@@ -55,59 +47,11 @@ export default function MovieRevealModal({
     dialogRef.current?.focus();
 
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isVisible, displayMovie, requestClose]);
+  }, [isVisible, movie, requestClose]);
 
-  useEffect(() => {
-    detailsLoadedForRef.current = null;
-  }, [movie?.id]);
+  if (!isVisible || !movie) return null;
 
-  useEffect(() => {
-    if (!isVisible || !displayMovie?.tmdbId) return undefined;
-    if (detailsLoadedForRef.current === displayMovie.id) return undefined;
-
-    let cancelled = false;
-    const controller = new AbortController();
-
-    async function loadTmdbDetails() {
-      const detail = await fetchTmdbMovieDetails(
-        displayMovie.tmdbId,
-        controller.signal
-      );
-      if (cancelled) return;
-
-      detailsLoadedForRef.current = displayMovie.id;
-
-      if (!detail) {
-        setWatchProviders((current) =>
-          current === undefined ? [] : current
-        );
-        return;
-      }
-
-      if (detail.overview) {
-        setOverview(detail.overview);
-      }
-      if (detail.voteAverage != null) {
-        setVoteAverage(detail.voteAverage);
-      }
-      if (detail.runtime != null) {
-        setRuntime(detail.runtime);
-      }
-      setWatchProviders((current) => {
-        if (current !== undefined) return current;
-        return Array.isArray(detail.watchProviders) ? detail.watchProviders : [];
-      });
-    }
-
-    loadTmdbDetails();
-
-    return () => {
-      cancelled = true;
-      controller.abort();
-    };
-  }, [isVisible, displayMovie?.id, displayMovie?.tmdbId]);
-
-  if (!isVisible || !displayMovie) return null;
+  const displayMovie = movie;
 
   const handleMarkWatched = () => {
     requestClose(() => onOpenMarkWatched?.(displayMovie.id));
@@ -161,8 +105,15 @@ export default function MovieRevealModal({
                   TMDB {voteAverage.toFixed(1)}
                 </span>
               )}
-              {runtimeLabel && (
-                <span className={styles.detailModalRuntime}>{runtimeLabel}</span>
+              {runtimeLoading ? (
+                <span
+                  className={styles.detailModalRuntimeShimmer}
+                  aria-hidden="true"
+                />
+              ) : (
+                runtimeLabel && (
+                  <span className={styles.detailModalRuntime}>{runtimeLabel}</span>
+                )
               )}
             </div>
           </div>
@@ -179,8 +130,11 @@ export default function MovieRevealModal({
             </p>
           </CollapsibleSection>
 
-          {displayMovie.tmdbId && watchProviders !== undefined && (
-            <DetailWatchProviders providers={watchProviders} />
+          {displayMovie.tmdbId && (
+            <DetailWatchProviders
+              providers={watchProviders}
+              isLoading={watchProvidersLoading}
+            />
           )}
         </div>
 

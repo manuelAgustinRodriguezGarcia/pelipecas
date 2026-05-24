@@ -8,6 +8,7 @@ export default function MovieSearchResults({
   isSearching,
   error,
   query,
+  isInPendingList,
   onSelect,
   onAddManual,
 }) {
@@ -64,6 +65,7 @@ export default function MovieSearchResults({
           <MovieSearchResultItem
             key={movie.tmdbId}
             movie={movie}
+            isInPendingList={isInPendingList?.(movie) ?? false}
             onSelect={onSelect}
           />
         ))}

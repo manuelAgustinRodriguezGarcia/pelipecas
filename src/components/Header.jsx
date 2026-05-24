@@ -13,21 +13,23 @@ export default function Header() {
     <>
       <header className={styles.header} aria-label="Pelipecas">
         <div className={styles.headerContent}>
-          <div className={styles.headerLogo} aria-hidden="true">
-            <Image
-              src="/logo.webp"
-              alt=""
-              width={71}
-              height={71}
-              priority
-              className={styles.headerLogoImg}
-            />
-          </div>
-          <div className={styles.headerText}>
-            <h1 className="logo">Pelipecas</h1>
-            <p className={`bodyText ${styles.subtitle}`}>
-              Tu cartelera personal de películas.
-            </p>
+          <div className={styles.headerBrand}>
+            <div className={styles.headerLogo} aria-hidden="true">
+              <Image
+                src="/icono-app.png"
+                alt=""
+                width={71}
+                height={71}
+                priority
+                className={styles.headerLogoImg}
+              />
+            </div>
+            <div className={styles.headerText}>
+              <h1 className={`logo ${styles.headerTitle}`}>Pelipecas</h1>
+              <p className={`bodyText ${styles.subtitle}`}>
+                Tu cartelera personal de películas.
+              </p>
+            </div>
           </div>
           <button
             type="button"

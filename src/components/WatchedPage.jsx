@@ -35,18 +35,14 @@ export default function WatchedPage() {
       </div>
 
       {watchedMovies.length > 0 && (
-        <div className={appStyles.countRow}>
+        <div className={appStyles.listToolbar}>
           <span className={`sectionLabel ${appStyles.countBadge}`}>
             <CircleCheck size={14} strokeWidth={1.5} aria-hidden="true" />
             {watchedMovies.length}{" "}
             {watchedMovies.length === 1 ? "película vista" : "películas vistas"}
           </span>
-        </div>
-      )}
-
-      {watchedMovies.length > 0 && (
-        <div className={appStyles.watchedSortRow}>
           <MovieSortDropdown
+            compact
             value={sortBy}
             onChange={setSortBy}
             options={WATCHED_SORT_OPTIONS}

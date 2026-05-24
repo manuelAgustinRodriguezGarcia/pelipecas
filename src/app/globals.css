@@ -25,15 +25,16 @@
   --spacing-xl: 24px;
   --spacing-xxl: 32px;
   --nav-height: 72px;
+  --shell-header-height: 65px;
   --app-max-width: 100%;
   --content-max-width: 100%;
   --sidebar-width: 220px;
   --font-sans: var(--font-geist-sans), "Geist", sans-serif;
 }
 
-@media (min-width: 768px) and (max-width: 1023.98px) {
+@media (min-width: 768px) {
   :root {
-    --app-max-width: 100%;
+    --shell-header-height: 88px;
   }
 }
 

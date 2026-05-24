@@ -14,15 +14,18 @@ export default function SectionTransitionOverlay() {
       aria-hidden={!isNavigating}
       aria-live="polite"
     >
-      <div className={styles.sectionTransitionLogo}>
-        <Image
-          src="/logo.webp"
-          alt=""
-          width={120}
-          height={120}
-          priority
-          className={styles.sectionTransitionLogoImg}
-        />
+      <div className={styles.sectionTransitionContent}>
+        <div className={styles.sectionTransitionLogo}>
+          <Image
+            src="/icono-app.png"
+            alt=""
+            width={120}
+            height={120}
+            priority
+            className={styles.sectionTransitionLogoImg}
+          />
+        </div>
+        <p className={styles.sectionTransitionTitle}>Pelipecas</p>
       </div>
     </div>
   );

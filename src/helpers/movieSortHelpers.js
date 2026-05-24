@@ -13,8 +13,8 @@ export const WATCHED_SORT_OPTIONS = [
   { value: "rating-asc", label: "Calificación: más baja" },
 ];
 
-export const DEFAULT_PENDING_SORT = "year-desc";
-export const DEFAULT_WATCHED_SORT = "year-desc";
+export const DEFAULT_PENDING_SORT = "title-asc";
+export const DEFAULT_WATCHED_SORT = "title-asc";
 
 function compareTitle(a, b) {
   return a.title.localeCompare(b.title, "es", { sensitivity: "base" });

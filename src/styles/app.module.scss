@@ -17,6 +17,15 @@
   animation: appEnter 0.5s ease-out;
 }
 
+.shellHeader {
+  position: sticky;
+  top: 0;
+  z-index: 110;
+  background: rgba(8, 8, 8, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
 .appBody {
   display: block;
   flex: 1;
@@ -73,6 +82,45 @@
   align-items: center;
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-lg);
+}
+
+.pendingStickyBar {
+  position: sticky;
+  top: var(--shell-header-height);
+  z-index: 45;
+  margin: 0 calc(-1 * var(--spacing-lg)) var(--spacing-lg);
+  padding: 0 var(--spacing-lg) var(--spacing-md);
+  background: var(--color-bg);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  @supports (backdrop-filter: blur(8px)) {
+    background: rgba(8, 8, 8, 0.92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+}
+
+.pendingStickyForm {
+  margin-bottom: 0;
+}
+
+.pendingStickyBar .listToolbar {
+  margin-top: var(--spacing-md);
+  margin-bottom: 0;
+}
+
+.listToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  min-width: 0;
+}
+
+.listToolbar .countBadge {
+  min-width: 0;
 }
 
 .watchedSortRow {
@@ -152,7 +200,7 @@
     border-radius: 0;
     border: none;
     box-shadow: none;
-    overflow: hidden;
+    overflow: visible;
   }
 }
 

@@ -13,6 +13,11 @@ import {
   getUserAverageRating,
   isRatingsComplete,
 } from "@/helpers/movieHelpers";
+import {
+  getCachedTmdbDetails,
+  mergeTmdbDetailsIntoMovie,
+  prefetchTmdbMovieDetails,
+} from "@/helpers/tmdbDetailsCache";
 import styles from "@/styles/components.module.scss";
 
 const AppUIContext = createContext(null);
@@ -104,6 +109,17 @@ export function AppUIProvider({ children }) {
   }, [deleteTarget, deleteMovie]);
 
   const handleSelectMovie = useCallback((movie) => {
+    if (!movie) return;
+
+    if (movie.tmdbId) {
+      prefetchTmdbMovieDetails(movie.tmdbId);
+      const cached = getCachedTmdbDetails(movie.tmdbId);
+      setDetailMovie(
+        cached ? mergeTmdbDetailsIntoMovie(movie, cached) : movie
+      );
+      return;
+    }
+
     setDetailMovie(movie);
   }, []);
 

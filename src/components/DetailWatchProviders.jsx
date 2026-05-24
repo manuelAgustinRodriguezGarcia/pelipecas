@@ -4,8 +4,9 @@ import { useState } from "react";
 import styles from "@/styles/components.module.scss";
 
 const STREMIO_ID = "stremio";
+const PROVIDER_SHIMMER_COUNT = 5;
 
-export default function DetailWatchProviders({ providers }) {
+export default function DetailWatchProviders({ providers, isLoading = false }) {
   const [activeId, setActiveId] = useState(null);
   const hasProviders = Array.isArray(providers) && providers.length > 0;
 
@@ -21,10 +22,25 @@ export default function DetailWatchProviders({ providers }) {
   };
 
   return (
-    <section className={styles.detailModalWatchSection} aria-label="Dónde ver">
+    <section
+      className={styles.detailModalWatchSection}
+      aria-label="Dónde ver"
+      aria-busy={isLoading}
+    >
       <h3 className={styles.detailModalWatchTitle}>DONDE VER</h3>
-      <ul className={styles.detailModalProviders}>
-        {hasProviders ? (
+      <ul
+        className={`${styles.detailModalProviders} ${isLoading ? styles.detailModalProvidersLoading : ""}`.trim()}
+      >
+        {isLoading ? (
+          Array.from({ length: PROVIDER_SHIMMER_COUNT }, (_, index) => (
+            <li key={`provider-shimmer-${index}`}>
+              <div
+                className={styles.detailModalProviderShimmer}
+                aria-hidden="true"
+              />
+            </li>
+          ))
+        ) : hasProviders ? (
           providers.map((provider) => (
             <li key={provider.providerId}>
               <div

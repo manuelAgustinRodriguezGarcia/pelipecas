@@ -264,6 +264,25 @@ export function isDuplicateMovie(movies, { title, tmdbId }) {
   return isDuplicateTitle(movies, title);
 }
 
+export function findPendingMovieMatch(pendingMovies, { title, tmdbId }) {
+  if (!Array.isArray(pendingMovies) || pendingMovies.length === 0) {
+    return null;
+  }
+
+  if (tmdbId != null) {
+    const byId = pendingMovies.find((movie) => movie.tmdbId === tmdbId);
+    if (byId) return byId;
+  }
+
+  const normalized = normalizeTitle(title ?? "");
+  if (!normalized) return null;
+
+  return (
+    pendingMovies.find((movie) => normalizeTitle(movie.title) === normalized) ??
+    null
+  );
+}
+
 export function formatWatchedDate(isoString) {
   if (!isoString) return null;
   const date = new Date(isoString);

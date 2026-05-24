@@ -9,7 +9,7 @@ export default function AppInitialLoader() {
       <div className={styles.appInitialLoaderCenter}>
         <div className={styles.appInitialLoaderLogo}>
           <Image
-            src="/logo.webp"
+            src="/icono-app.png"
             alt=""
             width={LOADER_LOGO_SIZE}
             height={LOADER_LOGO_SIZE}
@@ -18,7 +18,6 @@ export default function AppInitialLoader() {
             className={styles.appInitialLoaderLogoImg}
           />
         </div>
-        <p className={styles.appInitialLoaderText}>Cargando tu cartelera…</p>
       </div>
     </div>
   );

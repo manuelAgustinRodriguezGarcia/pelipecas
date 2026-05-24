@@ -2,15 +2,29 @@
 
 import { useCallback, useRef, useState } from "react";
 import { fetchTmdbMovieDetails } from "@/helpers/fetchTmdbMovieDetails";
+import {
+  findPendingMovieMatch,
+  isDuplicateMovie,
+} from "@/helpers/movieHelpers";
+import { useLockBodyScroll } from "@/hooks/useLockBodyScroll";
 import { useTmdbSearch } from "@/hooks/useTmdbSearch";
 import MovieSearchResults from "./MovieSearchResults";
+import RemoveFromPendingConfirmModal from "./RemoveFromPendingConfirmModal";
 import styles from "@/styles/components.module.scss";
 
 const DUPLICATE_MESSAGE = "Esta película ya está en tu lista.";
 
-export default function AddMovieForm({ onSelectMovie, onAddManual, sortControl = null }) {
+export default function AddMovieForm({
+  formClassName = "",
+  pendingMovies = [],
+  onSelectMovie,
+  onAddManual,
+  onRemoveFromPending,
+  sortControl = null,
+}) {
   const [validationError, setValidationError] = useState("");
   const [isAdding, setIsAdding] = useState(false);
+  const [removeTarget, setRemoveTarget] = useState(null);
   const inputRef = useRef(null);
   const {
     query,
@@ -21,15 +35,35 @@ export default function AddMovieForm({ onSelectMovie, onAddManual, sortControl =
     clearSearch,
   } = useTmdbSearch();
 
+  useLockBodyScroll(Boolean(removeTarget));
+
   const handleClear = useCallback(() => {
     setValidationError("");
     clearSearch();
     inputRef.current?.focus();
   }, [clearSearch]);
 
+  const handleConfirmRemove = useCallback(() => {
+    if (!removeTarget) return;
+    onRemoveFromPending?.(removeTarget.id);
+    setRemoveTarget(null);
+    handleClear();
+  }, [removeTarget, onRemoveFromPending, handleClear]);
+
   const handleSelect = useCallback(
     async (tmdbMovie) => {
       if (isAdding) return;
+
+      const existing = findPendingMovieMatch(pendingMovies, {
+        title: tmdbMovie.title,
+        tmdbId: tmdbMovie.tmdbId,
+      });
+
+      if (existing) {
+        setValidationError("");
+        setRemoveTarget({ id: existing.id, title: existing.title });
+        return;
+      }
 
       setValidationError("");
       setIsAdding(true);
@@ -60,7 +94,7 @@ export default function AddMovieForm({ onSelectMovie, onAddManual, sortControl =
         setIsAdding(false);
       }
     },
-    [onSelectMovie, handleClear, isAdding]
+    [pendingMovies, onSelectMovie, handleClear, isAdding]
   );
 
   const handleManualAdd = useCallback(
@@ -105,9 +139,18 @@ export default function AddMovieForm({ onSelectMovie, onAddManual, sortControl =
     }
   };
 
+  const isInPendingList = useCallback(
+    (movie) =>
+      isDuplicateMovie(pendingMovies, {
+        title: movie.title,
+        tmdbId: movie.tmdbId,
+      }),
+    [pendingMovies]
+  );
+
   return (
     <form
-      className={styles.addForm}
+      className={`${styles.addForm} ${formClassName}`.trim()}
       onSubmit={handleSubmit}
       noValidate
     >
@@ -143,6 +186,7 @@ export default function AddMovieForm({ onSelectMovie, onAddManual, sortControl =
               isSearching={isSearching}
               error={searchError}
               query={query}
+              isInPendingList={isInPendingList}
               onSelect={handleSelect}
               onAddManual={handleManualAdd}
             />
@@ -156,6 +200,12 @@ export default function AddMovieForm({ onSelectMovie, onAddManual, sortControl =
           {validationError}
         </p>
       )}
+
+      <RemoveFromPendingConfirmModal
+        movie={removeTarget}
+        onCancel={() => setRemoveTarget(null)}
+        onConfirm={handleConfirmRemove}
+      />
     </form>
   );
 }

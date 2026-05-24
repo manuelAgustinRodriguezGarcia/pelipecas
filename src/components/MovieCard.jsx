@@ -12,6 +12,7 @@ import {
   formatWatchedDate,
   isRatingsComplete,
 } from "@/helpers/movieHelpers";
+import { prefetchTmdbMovieDetails } from "@/helpers/tmdbDetailsCache";
 import UserRatingPanel from "./UserRatingPanel";
 
 function MovieMeta({ movie, variant }) {
@@ -53,8 +54,13 @@ export default function MovieCard({
       `button, [role="menu"], .${styles.cardMenuPanel}, .${styles.cardMenuOverlay}, .${styles.cardActions}`
     );
 
+  const prefetchDetails = () => {
+    if (movie.tmdbId) prefetchTmdbMovieDetails(movie.tmdbId);
+  };
+
   const handleArticleClick = (event) => {
     if (!onSelect || isMenuInteraction(event.target)) return;
+    prefetchDetails();
     onSelect(movie);
   };
 
@@ -93,6 +99,8 @@ export default function MovieCard({
       ref={cardRef}
       className={`${styles.movieCard} ${styles.movieCardResponsive} ${styles.movieCardWithMenu} ${styles.cardBodyWithMenu} ${isCardInteractive ? styles.movieCardClickable : ""}`}
       onClick={isCardInteractive ? handleArticleClick : undefined}
+      onPointerEnter={isCardInteractive ? prefetchDetails : undefined}
+      onPointerDown={isCardInteractive ? prefetchDetails : undefined}
       aria-label={isCardInteractive ? `Ver detalles de ${movie.title}` : undefined}
     >
       <div className={styles.cardLayout}>

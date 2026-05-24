@@ -9,6 +9,7 @@ import {
   getRevealMotionPattern,
   pickRandomPendingMovie,
 } from "@/helpers/revealHelpers";
+import { prefetchTmdbMovieDetails } from "@/helpers/tmdbDetailsCache";
 import EmptyState from "./EmptyState";
 import MovieRevealModal from "./MovieRevealModal";
 import MovieRevealStrip from "./MovieRevealStrip";
@@ -77,6 +78,7 @@ export default function TodayWeWatch({
 
     clearPickedMovie?.();
     setSelectedMovie(chosen);
+    if (chosen.tmdbId) prefetchTmdbMovieDetails(chosen.tmdbId);
     setRevealItems(items);
     setTargetIndex(index);
     setIsRevealed(false);
@@ -94,6 +96,7 @@ export default function TodayWeWatch({
 
     clearPickedMovie?.();
     setSelectedMovie(chosen);
+    if (chosen.tmdbId) prefetchTmdbMovieDetails(chosen.tmdbId);
     setRevealItems(items);
     setTargetIndex(index);
     setIsRevealed(false);
