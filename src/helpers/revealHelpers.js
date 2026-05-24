@@ -1,5 +1,6 @@
 export const REVEAL_CARD_GAP = 12;
 export const REVEAL_MIN_ITEMS = 28;
+export const REVEAL_MIN_DURATION_MS = 3000;
 export const REVEAL_ROLL_MS = 3600;
 
 /** Cuatro patrones de giro: distancia, velocidad, curva y sentido del deslizamiento. */
@@ -14,7 +15,7 @@ export const REVEAL_MOTION_PATTERNS = [
   {
     id: "quick-snap",
     travelItems: 6,
-    durationMs: 2200,
+    durationMs: 3200,
     easing: "cubic-bezier(0.33, 1, 0.68, 1)",
     direction: "fromRight",
   },
@@ -38,7 +39,12 @@ export function getRevealMotionPattern(index) {
   const safeIndex =
     ((index % REVEAL_MOTION_PATTERNS.length) + REVEAL_MOTION_PATTERNS.length) %
     REVEAL_MOTION_PATTERNS.length;
-  return REVEAL_MOTION_PATTERNS[safeIndex];
+  const pattern = REVEAL_MOTION_PATTERNS[safeIndex];
+
+  return {
+    ...pattern,
+    durationMs: Math.max(REVEAL_MIN_DURATION_MS, pattern.durationMs),
+  };
 }
 
 export function shuffleArray(items) {

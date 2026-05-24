@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import {
-  REVEAL_ROLL_MS,
+  REVEAL_MIN_DURATION_MS,
   calculateRevealOffsets,
   measureRevealStripMetrics,
 } from "@/helpers/revealHelpers";
@@ -26,7 +26,11 @@ export default function MovieRevealStrip({
   const applyMotionStyle = useCallback(() => {
     const strip = stripRef.current;
     if (!strip || !motionPattern) return;
-    strip.style.setProperty("--reveal-duration", `${motionPattern.durationMs}ms`);
+    const durationMs = Math.max(
+      REVEAL_MIN_DURATION_MS,
+      motionPattern?.durationMs ?? REVEAL_MIN_DURATION_MS
+    );
+    strip.style.setProperty("--reveal-duration", `${durationMs}ms`);
     strip.style.setProperty("--reveal-easing", motionPattern.easing);
     strip.dataset.motion = motionPattern.id;
   }, [motionPattern]);

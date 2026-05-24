@@ -43,6 +43,13 @@
     --app-max-width: 1280px;
     --content-max-width: 1000px;
     --nav-height: 0px;
+    --shell-header-height: 76px;
+  }
+
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
   }
 }
 
