@@ -17,8 +17,13 @@ export const metadata = {
   description:
     "Organizá tu cartelera personal, registrá películas vistas y dejá que Pelipecas elija tu próxima función.",
   icons: {
-    icon: [{ url: "/favicon.png", type: "image/png" }],
-    apple: [{ url: "/favicon.png", type: "image/png" }],
+    icon: [
+      { url: "/favicon.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
   },
   applicationName: "Pelipecas",
   appleWebApp: {
