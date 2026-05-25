@@ -161,7 +161,8 @@ export default function AddMovieForm({
           <div className={styles.inputWrap}>
             <input
               ref={inputRef}
-              type="text"
+              type="search"
+              name="pelipecas-movie-search"
               className={styles.input}
               placeholder="Agregar una película"
               value={query}
@@ -178,6 +179,14 @@ export default function AddMovieForm({
               aria-expanded={query.trim().length >= 2}
               aria-controls="movie-search-results"
               autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="sentences"
+              spellCheck={false}
+              inputMode="search"
+              enterKeyHint="search"
+              data-form-type="other"
+              data-lpignore="true"
+              data-1p-ignore="true"
               disabled={isAdding}
             />
             <MovieSearchResults
