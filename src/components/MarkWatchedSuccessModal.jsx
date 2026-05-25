@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useModalCloseAnimation } from "@/hooks/useModalCloseAnimation";
+import ModalPortal from "./ModalPortal";
 import MoviePoster from "./MoviePoster";
 import StarDisplay from "./StarDisplay";
 import styles from "@/styles/components.module.scss";
@@ -90,12 +91,14 @@ export default function MarkWatchedSuccessModal({
   }
 
   return (
-    <div
-      className={`${styles.modalBackdrop} ${styles.modalBackdropElevated} ${isClosing ? styles.modalBackdropClosing : ""}`}
-      onClick={() => requestClose()}
-      role="presentation"
-    >
-      {dialog}
-    </div>
+    <ModalPortal>
+      <div
+        className={`${styles.modalBackdrop} ${styles.modalBackdropElevated} ${isClosing ? styles.modalBackdropClosing : ""}`}
+        onClick={() => requestClose()}
+        role="presentation"
+      >
+        {dialog}
+      </div>
+    </ModalPortal>
   );
 }

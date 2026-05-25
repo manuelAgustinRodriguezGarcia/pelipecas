@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { Trash2, X } from "lucide-react";
 import { useModalCloseAnimation } from "@/hooks/useModalCloseAnimation";
+import ModalPortal from "./ModalPortal";
 import styles from "@/styles/components.module.scss";
 
 export default function RemoveFromPendingConfirmModal({
@@ -36,6 +37,7 @@ export default function RemoveFromPendingConfirmModal({
   };
 
   return (
+    <ModalPortal>
     <div
       className={`${styles.modalBackdrop} ${isClosing ? styles.modalBackdropClosing : ""}`}
       onClick={() => requestClose()}
@@ -88,5 +90,6 @@ export default function RemoveFromPendingConfirmModal({
         </div>
       </div>
     </div>
+    </ModalPortal>
   );
 }

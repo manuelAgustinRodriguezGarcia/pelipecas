@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { useLockBodyScroll } from "@/hooks/useLockBodyScroll";
 import { useModalCloseAnimation } from "@/hooks/useModalCloseAnimation";
+import ModalPortal from "./ModalPortal";
 import styles from "@/styles/components.module.scss";
 
 /** Sube este número al reemplazar public/pelipecas-mascots.webp en producción. */
@@ -44,6 +45,7 @@ export default function LoveNoteModal({ isOpen, onClose }) {
   if (!isVisible) return null;
 
   return (
+    <ModalPortal>
     <div
       className={`${styles.modalBackdrop} ${styles.modalBackdropHost} ${isClosing ? styles.modalBackdropClosing : ""}`}
       onClick={() => requestClose()}
@@ -95,5 +97,6 @@ export default function LoveNoteModal({ isOpen, onClose }) {
         </p>
       </div>
     </div>
+    </ModalPortal>
   );
 }

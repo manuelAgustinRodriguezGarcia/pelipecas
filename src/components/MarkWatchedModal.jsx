@@ -9,6 +9,7 @@ import {
   isRatingsComplete,
 } from "@/helpers/movieHelpers";
 import { useModalCloseAnimation } from "@/hooks/useModalCloseAnimation";
+import ModalPortal from "./ModalPortal";
 import MoviePoster from "./MoviePoster";
 import StarRatingRow from "./StarRatingRow";
 import styles from "@/styles/components.module.scss";
@@ -188,12 +189,14 @@ export default function MarkWatchedModal({
   }
 
   return (
-    <div
-      className={`${styles.modalBackdrop} ${isClosing ? styles.modalBackdropClosing : ""}`}
-      onClick={() => requestClose()}
-      role="presentation"
-    >
-      {dialog}
-    </div>
+    <ModalPortal>
+      <div
+        className={`${styles.modalBackdrop} ${isClosing ? styles.modalBackdropClosing : ""}`}
+        onClick={() => requestClose()}
+        role="presentation"
+      >
+        {dialog}
+      </div>
+    </ModalPortal>
   );
 }

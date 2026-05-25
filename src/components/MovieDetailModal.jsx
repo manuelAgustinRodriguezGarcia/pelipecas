@@ -7,6 +7,7 @@ import { useModalCloseAnimation } from "@/hooks/useModalCloseAnimation";
 import { useTmdbMovieDetails } from "@/hooks/useTmdbMovieDetails";
 import CollapsibleSection from "./CollapsibleSection";
 import DetailWatchProviders from "./DetailWatchProviders";
+import ModalPortal from "./ModalPortal";
 import MoviePoster from "./MoviePoster";
 import UserRatingPanel from "./UserRatingPanel";
 import styles from "@/styles/components.module.scss";
@@ -192,12 +193,14 @@ export default function MovieDetailModal({
   }
 
   return (
-    <div
-      className={`${styles.modalBackdrop} ${isClosing ? styles.modalBackdropClosing : ""}`}
-      onClick={() => requestClose()}
-      role="presentation"
-    >
-      {dialog}
-    </div>
+    <ModalPortal>
+      <div
+        className={`${styles.modalBackdrop} ${isClosing ? styles.modalBackdropClosing : ""}`}
+        onClick={() => requestClose()}
+        role="presentation"
+      >
+        {dialog}
+      </div>
+    </ModalPortal>
   );
 }

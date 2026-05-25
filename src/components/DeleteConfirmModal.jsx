@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { Trash2, X } from "lucide-react";
 import { useModalCloseAnimation } from "@/hooks/useModalCloseAnimation";
+import ModalPortal from "./ModalPortal";
 import styles from "@/styles/components.module.scss";
 
 export default function DeleteConfirmModal({ movie, onCancel, onConfirm }) {
@@ -32,6 +33,7 @@ export default function DeleteConfirmModal({ movie, onCancel, onConfirm }) {
   };
 
   return (
+    <ModalPortal>
     <div
       className={`${styles.modalBackdrop} ${isClosing ? styles.modalBackdropClosing : ""}`}
       onClick={() => requestClose()}
@@ -84,5 +86,6 @@ export default function DeleteConfirmModal({ movie, onCancel, onConfirm }) {
         </div>
       </div>
     </div>
+    </ModalPortal>
   );
 }

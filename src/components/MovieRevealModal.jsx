@@ -8,6 +8,7 @@ import { useModalCloseAnimation } from "@/hooks/useModalCloseAnimation";
 import { useTmdbMovieDetails } from "@/hooks/useTmdbMovieDetails";
 import CollapsibleSection from "./CollapsibleSection";
 import DetailWatchProviders from "./DetailWatchProviders";
+import ModalPortal from "./ModalPortal";
 import MoviePoster from "./MoviePoster";
 import styles from "@/styles/components.module.scss";
 
@@ -65,6 +66,7 @@ export default function MovieRevealModal({
   const runtimeLabel = formatRuntime(runtime ?? displayMovie.runtime);
 
   return (
+    <ModalPortal>
     <div
       className={`${styles.modalBackdrop} ${styles.modalBackdropHost} ${isClosing ? styles.modalBackdropClosing : ""}`}
       onClick={() => requestClose()}
@@ -159,5 +161,6 @@ export default function MovieRevealModal({
         </div>
       </div>
     </div>
+    </ModalPortal>
   );
 }

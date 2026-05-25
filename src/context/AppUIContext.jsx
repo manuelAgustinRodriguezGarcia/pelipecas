@@ -8,6 +8,7 @@ import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 import DetailActionConfirmModal from "@/components/DetailActionConfirmModal";
 import MarkWatchedModal from "@/components/MarkWatchedModal";
 import MarkWatchedSuccessModal from "@/components/MarkWatchedSuccessModal";
+import ModalPortal from "@/components/ModalPortal";
 import MovieDetailModal from "@/components/MovieDetailModal";
 import {
   getUserAverageRating,
@@ -193,6 +194,7 @@ export function AppUIProvider({ children }) {
         onConfirm={handleConfirmDetailAction}
       />
       {overlayVisible && (
+        <ModalPortal>
         <div
           className={`${styles.modalBackdrop} ${styles.modalBackdropHost} ${markWatchedSwapping ? styles.modalBackdropHostSwapping : ""} ${overlayClosing ? styles.modalBackdropClosing : ""}`}
           onClick={markWatchedSwapping ? undefined : handleOverlayBackdropClick}
@@ -229,6 +231,7 @@ export function AppUIProvider({ children }) {
             />
           )}
         </div>
+        </ModalPortal>
       )}
     </AppUIContext.Provider>
   );

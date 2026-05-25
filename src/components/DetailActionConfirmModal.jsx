@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { ArrowLeft, Trash2, X } from "lucide-react";
 import { useModalCloseAnimation } from "@/hooks/useModalCloseAnimation";
+import ModalPortal from "./ModalPortal";
 import styles from "@/styles/components.module.scss";
 
 const COPY = {
@@ -78,6 +79,7 @@ export default function DetailActionConfirmModal({ confirm, onCancel, onConfirm 
   };
 
   return (
+    <ModalPortal>
     <div
       className={`${styles.modalBackdrop} ${styles.modalBackdropElevated} ${isClosing ? styles.modalBackdropClosing : ""}`}
       onClick={() => requestClose()}
@@ -132,5 +134,6 @@ export default function DetailActionConfirmModal({ confirm, onCancel, onConfirm 
         </div>
       </div>
     </div>
+    </ModalPortal>
   );
 }
