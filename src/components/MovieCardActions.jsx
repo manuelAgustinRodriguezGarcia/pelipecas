@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleCheck, SquareArrowLeft, Trash2 } from "lucide-react";
+import { CircleCheck, Clapperboard, Trash2 } from "lucide-react";
 import styles from "@/styles/components.module.scss";
 
 function stopCardClick(event) {
@@ -29,7 +29,7 @@ export default function MovieCardActions({
     onDelete?.(movieId);
   };
 
-  const primaryLabel = variant === "pending" ? "La vimos" : "Mover a para ver";
+  const primaryLabel = variant === "pending" ? "La vimos" : "Para ver";
 
   return (
     <div className={styles.cardActionsRow} onClick={stopCardClick}>
@@ -49,11 +49,9 @@ export default function MovieCardActions({
         {variant === "pending" ? (
           <CircleCheck size={16} strokeWidth={1.5} aria-hidden="true" />
         ) : (
-          <SquareArrowLeft size={16} strokeWidth={2} aria-hidden="true" />
+          <Clapperboard size={16} strokeWidth={1.75} aria-hidden="true" />
         )}
-        <span className={variant === "pending" ? "sectionLabel" : undefined}>
-          {primaryLabel}
-        </span>
+        <span className="sectionLabel">{primaryLabel}</span>
       </button>
     </div>
   );

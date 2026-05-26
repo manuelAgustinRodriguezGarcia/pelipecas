@@ -177,7 +177,7 @@ export function AppUIProvider({ children }) {
     onSelectMovie: handleSelectMovie,
     onOpenMarkWatched: handleOpenMarkWatched,
     onDelete: handleDeleteRequest,
-    onMoveToPending: moveToPending,
+    onMoveToPending: handleRequestMoveToPending,
   };
 
   return (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CircleCheck, EllipsisVertical, SquareArrowLeft, Trash2 } from "lucide-react";
+import { CircleCheck, Clapperboard, EllipsisVertical, Trash2 } from "lucide-react";
 import { useCardSwipeOpen } from "@/hooks/useCardSwipeOpen";
 import styles from "@/styles/components.module.scss";
 
@@ -162,7 +162,7 @@ export default function MovieCardActionMenu({
               {variant === "pending" ? (
                 <CircleCheck size={20} strokeWidth={1.5} aria-hidden="true" />
               ) : (
-                <SquareArrowLeft size={20} strokeWidth={2} aria-hidden="true" />
+                <Clapperboard size={20} strokeWidth={1.75} aria-hidden="true" />
               )}
             </button>
           </div>
