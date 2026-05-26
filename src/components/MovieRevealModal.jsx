@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { CircleCheck, Star, X } from "lucide-react";
+import { CircleCheck, RefreshCcw, Star, X } from "lucide-react";
 import { formatRuntime } from "@/helpers/movieHelpers";
 import { useLockBodyScroll } from "@/hooks/useLockBodyScroll";
 import { useModalCloseAnimation } from "@/hooks/useModalCloseAnimation";
@@ -145,10 +145,11 @@ export default function MovieRevealModal({
         >
           <button
             type="button"
-            className={styles.btnSecondary}
+            className={`${styles.btnSecondary} ${styles.btnIconOnly}`}
             onClick={handlePickAgain}
+            aria-label="Elegir otra"
           >
-            Elegir otra
+            <RefreshCcw size={16} strokeWidth={1.75} aria-hidden="true" />
           </button>
           <button
             type="button"

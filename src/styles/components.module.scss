@@ -2536,14 +2536,15 @@
   flex-shrink: 0;
 
   .btnPrimary,
-  .btnSecondary {
+  .btnSecondary:not(.btnIconOnly) {
     flex: 1;
     min-width: 0;
     min-height: 44px;
   }
 
   .btnDanger.btnIconOnly,
-  .btnMuted.btnIconOnly {
+  .btnMuted.btnIconOnly,
+  .btnSecondary.btnIconOnly {
     flex-shrink: 0;
     min-height: 44px;
   }
