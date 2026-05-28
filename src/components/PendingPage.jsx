@@ -42,6 +42,7 @@ export default function PendingPage() {
           formClassName={appStyles.pendingStickyForm}
           pendingMovies={pendingMovies}
           onSelectMovie={addMovieFromTmdb}
+          onViewPendingMovie={onSelectMovie}
           onAddManual={addMovieManually}
           onRemoveFromPending={deleteMovie}
         />

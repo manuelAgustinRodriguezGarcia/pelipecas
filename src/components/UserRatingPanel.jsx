@@ -24,11 +24,17 @@ export default function UserRatingPanel({ ratings, compact = false }) {
     <div
       className={`${styles.userRatingPanel} ${compact ? styles.userRatingPanelCompact : ""}`}
     >
-      <div className={styles.userRatingHighlight}>
-        <span className={styles.userRatingLabel}>Calificación</span>
-        <span className={styles.userRatingScore}>{average.toFixed(1)}</span>
+      <div className={styles.userRatingSummaryRow}>
+        <div className={styles.userRatingHighlight}>
+          <span className={styles.userRatingLabel}>Calificación</span>
+          <span className={styles.userRatingScore}>{average.toFixed(1)}</span>
+        </div>
+        <StarDisplay
+          value={average}
+          size={starSize}
+          className={styles.starDisplayPremium}
+        />
       </div>
-      <StarDisplay value={average} size={starSize} />
       {!compact && (
         <>
           <button
@@ -55,7 +61,11 @@ export default function UserRatingPanel({ ratings, compact = false }) {
                     <span className={styles.userRatingDetailLabel}>
                       {category.label}
                     </span>
-                    <StarDisplay value={ratings[category.key]} size={starSize} />
+                    <StarDisplay
+                      value={ratings[category.key]}
+                      size={starSize}
+                      className={styles.starDisplayPremium}
+                    />
                   </li>
                 ))}
               </ul>

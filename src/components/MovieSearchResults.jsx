@@ -10,6 +10,8 @@ export default function MovieSearchResults({
   query,
   isInPendingList,
   onSelect,
+  onViewInList,
+  onRemoveInList,
   onAddManual,
 }) {
   const trimmed = query.trim();
@@ -67,6 +69,8 @@ export default function MovieSearchResults({
             movie={movie}
             isInPendingList={isInPendingList?.(movie) ?? false}
             onSelect={onSelect}
+            onViewInList={onViewInList}
+            onRemoveInList={onRemoveInList}
           />
         ))}
     </div>

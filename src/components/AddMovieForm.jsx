@@ -18,6 +18,7 @@ export default function AddMovieForm({
   formClassName = "",
   pendingMovies = [],
   onSelectMovie,
+  onViewPendingMovie,
   onAddManual,
   onRemoveFromPending,
   sortControl = null,
@@ -50,18 +51,44 @@ export default function AddMovieForm({
     handleClear();
   }, [removeTarget, onRemoveFromPending, handleClear]);
 
+  const findExistingPending = useCallback(
+    (tmdbMovie) =>
+      findPendingMovieMatch(pendingMovies, {
+        title: tmdbMovie.title,
+        tmdbId: tmdbMovie.tmdbId,
+      }),
+    [pendingMovies]
+  );
+
+  const handleViewInList = useCallback(
+    (tmdbMovie) => {
+      const existing = findExistingPending(tmdbMovie);
+      if (!existing) return;
+
+      setValidationError("");
+      handleClear();
+      onViewPendingMovie?.(existing);
+    },
+    [findExistingPending, handleClear, onViewPendingMovie]
+  );
+
+  const handleRemoveInList = useCallback(
+    (tmdbMovie) => {
+      const existing = findExistingPending(tmdbMovie);
+      if (!existing) return;
+
+      setValidationError("");
+      setRemoveTarget({ id: existing.id, title: existing.title });
+    },
+    [findExistingPending]
+  );
+
   const handleSelect = useCallback(
     async (tmdbMovie) => {
       if (isAdding) return;
 
-      const existing = findPendingMovieMatch(pendingMovies, {
-        title: tmdbMovie.title,
-        tmdbId: tmdbMovie.tmdbId,
-      });
-
-      if (existing) {
-        setValidationError("");
-        setRemoveTarget({ id: existing.id, title: existing.title });
+      if (findExistingPending(tmdbMovie)) {
+        handleViewInList(tmdbMovie);
         return;
       }
 
@@ -94,7 +121,7 @@ export default function AddMovieForm({
         setIsAdding(false);
       }
     },
-    [pendingMovies, onSelectMovie, handleClear, isAdding]
+    [findExistingPending, handleViewInList, onSelectMovie, handleClear, isAdding]
   );
 
   const handleManualAdd = useCallback(
@@ -117,11 +144,25 @@ export default function AddMovieForm({
     [onAddManual, handleClear]
   );
 
+  const isInPendingList = useCallback(
+    (movie) =>
+      isDuplicateMovie(pendingMovies, {
+        title: movie.title,
+        tmdbId: movie.tmdbId,
+      }),
+    [pendingMovies]
+  );
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (results.length > 0 && !isSearching && !isAdding) {
-      await handleSelect(results[0]);
+      const first = results[0];
+      if (isInPendingList(first)) {
+        handleViewInList(first);
+      } else {
+        await handleSelect(first);
+      }
       return;
     }
 
@@ -138,15 +179,6 @@ export default function AddMovieForm({
       handleClear();
     }
   };
-
-  const isInPendingList = useCallback(
-    (movie) =>
-      isDuplicateMovie(pendingMovies, {
-        title: movie.title,
-        tmdbId: movie.tmdbId,
-      }),
-    [pendingMovies]
-  );
 
   return (
     <form
@@ -197,6 +229,8 @@ export default function AddMovieForm({
               query={query}
               isInPendingList={isInPendingList}
               onSelect={handleSelect}
+              onViewInList={handleViewInList}
+              onRemoveInList={handleRemoveInList}
               onAddManual={handleManualAdd}
             />
           </div>

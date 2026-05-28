@@ -457,12 +457,9 @@
 .searchResultItem {
   display: flex;
   align-items: flex-start;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
   width: 100%;
   padding: var(--spacing-md);
-  text-align: left;
-  background: transparent;
-  border: none;
   border-bottom: 1px solid var(--color-border-soft);
   transition: background 0.2s ease, border-color 0.2s ease;
 
@@ -471,9 +468,28 @@
   }
 
   &:hover,
-  &:focus-visible {
+  &:focus-within {
     background: var(--color-surface);
     border-color: var(--color-border-gold);
+  }
+}
+
+.searchResultItemAction {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    outline: none;
   }
 }
 
@@ -481,7 +497,7 @@
   background: rgba(255, 249, 234, 0.07);
 
   &:hover,
-  &:focus-visible {
+  &:focus-within {
     background: rgba(255, 249, 234, 0.1);
     border-color: var(--color-border-soft);
   }
@@ -495,7 +511,17 @@
   align-self: center;
   margin-left: auto;
   padding: var(--spacing-xs);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
   color: var(--color-gold-soft);
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--color-gold);
+    background: rgba(255, 249, 234, 0.08);
+  }
 }
 
 .searchResultPoster {
@@ -2510,6 +2536,14 @@
   & + & {
     margin-top: var(--spacing-lg);
   }
+
+  & + .collapsibleSection {
+    margin-top: var(--spacing-lg);
+  }
+
+  &:has(.collapsiblePanelOpen) + .collapsibleSection {
+    margin-top: var(--spacing-xl);
+  }
 }
 
 .detailSectionTitle {
@@ -2817,15 +2851,28 @@
 .starDisplay {
   display: inline-flex;
   align-items: center;
-  gap: 1px;
+  gap: 2px;
   color: var(--color-gold);
   flex-shrink: 0;
+  width: fit-content;
+}
+
+.starDisplayPremium {
+  color: #f8ecc4;
+  gap: 3px;
+
+  svg {
+    stroke: #c9a227;
+    stroke-width: 1.5;
+    filter: drop-shadow(0 0 4px rgba(212, 175, 55, 0.35))
+      drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+  }
 }
 
 .userRatingPanel {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm);
   margin-top: var(--spacing-xs);
   width: 100%;
 }
@@ -2840,10 +2887,20 @@
   }
 }
 
+.userRatingSummaryRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  width: 100%;
+}
+
 .userRatingHighlight {
   display: flex;
   align-items: baseline;
   gap: var(--spacing-sm);
+  flex: 1;
+  min-width: 0;
 }
 
 .userRatingLabel {
@@ -2882,10 +2939,14 @@
 .userRatingDetailList {
   list-style: none;
   margin: 0;
-  padding: var(--spacing-sm) 0 0;
+  padding: var(--spacing-sm) 0 var(--spacing-xs);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
+}
+
+.userRatingPanel:has(.collapsiblePanelOpen) {
+  margin-bottom: var(--spacing-xs);
 }
 
 .userRatingDetailItem {

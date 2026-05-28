@@ -10,6 +10,8 @@ export default function MovieSearchResultItem({
   movie,
   isInPendingList = false,
   onSelect,
+  onViewInList,
+  onRemoveInList,
 }) {
   const [imageError, setImageError] = useState(false);
   const visual = generateMovieVisual(movie.title);
@@ -18,17 +20,34 @@ export default function MovieSearchResultItem({
     movie.originalTitle.toLowerCase() !== movie.title.toLowerCase();
   const showPoster = movie.posterUrl && !imageError;
 
+  const handleClick = () => {
+    if (isInPendingList) {
+      onViewInList?.(movie);
+      return;
+    }
+    onSelect(movie);
+  };
+
+  const handleRemoveClick = () => {
+    onRemoveInList?.(movie);
+  };
+
   return (
-    <button
-      type="button"
+    <div
       className={`${styles.searchResultItem} ${isInPendingList ? styles.searchResultItemInList : ""}`.trim()}
-      onClick={() => onSelect(movie)}
-      aria-label={
-        isInPendingList
-          ? `${movie.title}, ya está en para ver`
-          : `Agregar ${movie.title}`
-      }
+      role="option"
+      aria-selected="false"
     >
+      <button
+        type="button"
+        className={styles.searchResultItemAction}
+        onClick={handleClick}
+        aria-label={
+          isInPendingList
+            ? `Ver ${movie.title}`
+            : `Agregar ${movie.title}`
+        }
+      >
       <div className={styles.searchResultPoster}>
         {showPoster ? (
           <Image
@@ -65,16 +84,19 @@ export default function MovieSearchResultItem({
           <p className={styles.searchResultOverview}>{movie.overview}</p>
         )}
       </div>
+      </button>
 
       {isInPendingList && (
-        <span
+        <button
+          type="button"
           className={styles.searchResultInListBadge}
-          title="Ya está en para ver"
-          aria-hidden="true"
+          onClick={handleRemoveClick}
+          aria-label={`Quitar ${movie.title} de para ver`}
+          title="Quitar de para ver"
         >
-          <Clapperboard size={20} strokeWidth={1.5} />
-        </span>
+          <Clapperboard size={20} strokeWidth={1.5} aria-hidden="true" />
+        </button>
       )}
-    </button>
+    </div>
   );
 }
