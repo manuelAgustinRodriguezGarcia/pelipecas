@@ -17,7 +17,8 @@ import appStyles from "@/styles/app.module.scss";
 
 export default function PendingPage() {
   const router = useRouter();
-  const { onSelectMovie, onOpenMarkWatched, onDelete } = useAppUI();
+  const { onSelectMovie, onOpenMarkWatched, onDelete, showAddedMovieToast } =
+    useAppUI();
   const { pendingMovies, addMovieFromTmdb, addMovieManually, deleteMovie } =
     useMoviesContext();
   const [sortBy, setSortBy] = useState(DEFAULT_PENDING_SORT);
@@ -43,6 +44,7 @@ export default function PendingPage() {
           pendingMovies={pendingMovies}
           onSelectMovie={addMovieFromTmdb}
           onViewPendingMovie={onSelectMovie}
+          onMovieAdded={showAddedMovieToast}
           onAddManual={addMovieManually}
           onRemoveFromPending={deleteMovie}
         />

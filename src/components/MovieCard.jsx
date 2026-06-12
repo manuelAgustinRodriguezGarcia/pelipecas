@@ -10,6 +10,8 @@ import styles from "@/styles/components.module.scss";
 import {
   formatRuntime,
   formatWatchedDate,
+  getMovieLocalizedTitle,
+  getMoviePrimaryTitle,
   isRatingsComplete,
 } from "@/helpers/movieHelpers";
 import { prefetchTmdbMovieDetails } from "@/helpers/tmdbDetailsCache";
@@ -48,6 +50,8 @@ export default function MovieCard({
 }) {
   const cardRef = useRef(null);
   const isCardInteractive = Boolean(onSelect);
+  const primaryTitle = getMoviePrimaryTitle(movie);
+  const localizedTitle = getMovieLocalizedTitle(movie);
 
   const isMenuInteraction = (target) =>
     target.closest(
@@ -70,7 +74,10 @@ export default function MovieCard({
         <MoviePoster movie={movie} size="cardVertical" />
         <div className={styles.cardContent}>
           <CinemaBadge variant="picked">Película seleccionada</CinemaBadge>
-          <h3 className={styles.cardTitle}>{movie.title}</h3>
+          <h3 className={styles.cardTitle}>{primaryTitle}</h3>
+          {localizedTitle && (
+            <span className={styles.cardLocalizedTitle}>{localizedTitle}</span>
+          )}
           <MovieMeta movie={movie} variant="result" />
           <div className={styles.resultActions}>
             <button
@@ -101,13 +108,16 @@ export default function MovieCard({
       onClick={isCardInteractive ? handleArticleClick : undefined}
       onPointerEnter={isCardInteractive ? prefetchDetails : undefined}
       onPointerDown={isCardInteractive ? prefetchDetails : undefined}
-      aria-label={isCardInteractive ? `Ver detalles de ${movie.title}` : undefined}
+      aria-label={isCardInteractive ? `Ver detalles de ${primaryTitle}` : undefined}
     >
       <div className={styles.cardLayout}>
         <div className={styles.cardClickArea}>
           <MoviePoster movie={movie} size="cardVertical" />
           <div className={styles.cardContentMain}>
-            <h3 className={styles.cardTitle}>{movie.title}</h3>
+            <h3 className={styles.cardTitle}>{primaryTitle}</h3>
+            {localizedTitle && (
+              <span className={styles.cardLocalizedTitle}>{localizedTitle}</span>
+            )}
             <MovieMeta movie={movie} variant={variant} />
             {variant === "watched" && isRatingsComplete(movie.ratings) && (
               <UserRatingPanel ratings={movie.ratings} compact />
@@ -118,7 +128,7 @@ export default function MovieCard({
           <MovieCardActionMenu
             cardRef={cardRef}
             movieId={movie.id}
-            movieTitle={movie.title}
+            movieTitle={primaryTitle}
             variant={variant}
             onSelectMovie={variant === "pending" ? () => onSelect?.(movie) : undefined}
             onMoveToPending={onMoveToPending}
@@ -129,7 +139,7 @@ export default function MovieCard({
       <div className={styles.cardFooterDesktop}>
         <MovieCardActions
           movieId={movie.id}
-          movieTitle={movie.title}
+          movieTitle={primaryTitle}
           variant={variant}
           onSelectMovie={variant === "pending" ? () => onSelect?.(movie) : undefined}
           onMoveToPending={onMoveToPending}

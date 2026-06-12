@@ -14,10 +14,13 @@ export default function MovieSearchResultItem({
   onRemoveInList,
 }) {
   const [imageError, setImageError] = useState(false);
-  const visual = generateMovieVisual(movie.title);
-  const showOriginal =
-    movie.originalTitle &&
-    movie.originalTitle.toLowerCase() !== movie.title.toLowerCase();
+  const primaryTitle =
+    movie.searchPrimaryTitle ?? movie.originalTitle ?? movie.title;
+  const localizedTitle = movie.searchLocalizedTitle ?? null;
+  const visual = generateMovieVisual(primaryTitle);
+  const showLocalized =
+    localizedTitle &&
+    localizedTitle.toLowerCase() !== primaryTitle.toLowerCase();
   const showPoster = movie.posterUrl && !imageError;
 
   const handleClick = () => {
@@ -44,8 +47,8 @@ export default function MovieSearchResultItem({
         onClick={handleClick}
         aria-label={
           isInPendingList
-            ? `Ver ${movie.title}`
-            : `Agregar ${movie.title}`
+            ? `Ver ${primaryTitle}`
+            : `Agregar ${primaryTitle}`
         }
       >
       <div className={styles.searchResultPoster}>
@@ -72,13 +75,13 @@ export default function MovieSearchResultItem({
 
       <div className={styles.searchResultBody}>
         <div className={styles.searchResultTitleRow}>
-          <span className={styles.searchResultTitle}>{movie.title}</span>
+          <span className={styles.searchResultTitle}>{primaryTitle}</span>
           {movie.year && (
             <span className={styles.searchResultYear}>{movie.year}</span>
           )}
         </div>
-        {showOriginal && (
-          <span className={styles.searchResultOriginal}>{movie.originalTitle}</span>
+        {showLocalized && (
+          <span className={styles.searchResultOriginal}>{localizedTitle}</span>
         )}
         {movie.overview && (
           <p className={styles.searchResultOverview}>{movie.overview}</p>
@@ -91,7 +94,7 @@ export default function MovieSearchResultItem({
           type="button"
           className={styles.searchResultInListBadge}
           onClick={handleRemoveClick}
-          aria-label={`Quitar ${movie.title} de para ver`}
+          aria-label={`Quitar ${primaryTitle} de para ver`}
           title="Quitar de para ver"
         >
           <Clapperboard size={20} strokeWidth={1.5} aria-hidden="true" />

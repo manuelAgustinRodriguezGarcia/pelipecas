@@ -19,6 +19,7 @@ export default function AddMovieForm({
   pendingMovies = [],
   onSelectMovie,
   onViewPendingMovie,
+  onMovieAdded,
   onAddManual,
   onRemoveFromPending,
   sortControl = null,
@@ -116,12 +117,16 @@ export default function AddMovieForm({
           return;
         }
 
+        if (result.movie) {
+          onMovieAdded?.(result.movie);
+        }
+
         handleClear();
       } finally {
         setIsAdding(false);
       }
     },
-    [findExistingPending, handleViewInList, onSelectMovie, handleClear, isAdding]
+    [findExistingPending, handleViewInList, onSelectMovie, onMovieAdded, handleClear, isAdding]
   );
 
   const handleManualAdd = useCallback(
@@ -139,9 +144,13 @@ export default function AddMovieForm({
         return;
       }
 
+      if (result.movie) {
+        onMovieAdded?.(result.movie);
+      }
+
       handleClear();
     },
-    [onAddManual, handleClear]
+    [onAddManual, onMovieAdded, handleClear]
   );
 
   const isInPendingList = useCallback(

@@ -58,19 +58,22 @@ export function useMovies() {
     }
 
     let duplicate = false;
+    let createdMovie = null;
+
     setMovies((current) => {
       if (isDuplicateMovie(current, { tmdbId: tmdbData.tmdbId })) {
         duplicate = true;
         return current;
       }
-      return [createMovieFromTmdb(tmdbData, "pending"), ...current];
+      createdMovie = createMovieFromTmdb(tmdbData, "pending");
+      return [createdMovie, ...current];
     });
 
     if (duplicate) {
       return { success: false, error: "duplicate" };
     }
 
-    return { success: true };
+    return { success: true, movie: createdMovie };
   }, []);
 
   const addMovieManually = useCallback((title) => {
@@ -80,19 +83,22 @@ export function useMovies() {
     }
 
     let duplicate = false;
+    let createdMovie = null;
+
     setMovies((current) => {
       if (isDuplicateMovie(current, { title: trimmed, tmdbId: null })) {
         duplicate = true;
         return current;
       }
-      return [createMovie(trimmed, "pending"), ...current];
+      createdMovie = createMovie(trimmed, "pending");
+      return [createdMovie, ...current];
     });
 
     if (duplicate) {
       return { success: false, error: "duplicate" };
     }
 
-    return { success: true };
+    return { success: true, movie: createdMovie };
   }, []);
 
   const markAsWatched = useCallback((id, ratings) => {

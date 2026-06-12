@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useState } from "react";
+import AddedMovieToast from "@/components/AddedMovieToast";
 import { useLockBodyScroll } from "@/hooks/useLockBodyScroll";
 import { useModalCloseAnimation } from "@/hooks/useModalCloseAnimation";
 import { useMoviesContext } from "@/context/MoviesContext";
@@ -32,6 +33,7 @@ export function AppUIProvider({ children }) {
   const [detailActionConfirm, setDetailActionConfirm] = useState(null);
   const [markWatchedSuccess, setMarkWatchedSuccess] = useState(null);
   const [markWatchedSwapping, setMarkWatchedSwapping] = useState(false);
+  const [addedMovieToast, setAddedMovieToast] = useState(null);
 
   const overlayOpen = Boolean(
     detailMovie || markWatchedTarget || markWatchedSuccess
@@ -173,11 +175,21 @@ export function AppUIProvider({ children }) {
     requestOverlayClose();
   }, [requestOverlayClose]);
 
+  const dismissAddedMovieToast = useCallback(() => {
+    setAddedMovieToast(null);
+  }, []);
+
+  const showAddedMovieToast = useCallback((movie) => {
+    if (!movie) return;
+    setAddedMovieToast(movie);
+  }, []);
+
   const value = {
     onSelectMovie: handleSelectMovie,
     onOpenMarkWatched: handleOpenMarkWatched,
     onDelete: handleDeleteRequest,
     onMoveToPending: handleRequestMoveToPending,
+    showAddedMovieToast,
   };
 
   return (
@@ -192,6 +204,13 @@ export function AppUIProvider({ children }) {
         confirm={detailActionConfirm}
         onCancel={handleCancelDetailActionConfirm}
         onConfirm={handleConfirmDetailAction}
+      />
+      <AddedMovieToast
+        key={addedMovieToast?.id ?? "added-movie-toast"}
+        movie={addedMovieToast}
+        visible={Boolean(addedMovieToast)}
+        onDismiss={dismissAddedMovieToast}
+        onOpen={handleSelectMovie}
       />
       {overlayVisible && (
         <ModalPortal>

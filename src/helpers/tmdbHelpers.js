@@ -162,6 +162,50 @@ function resolveSearchTitleWithoutArgentina(arMovie, mxMovie, fallback) {
   return fallback?.title?.trim() || originalTitle || "Sin título";
 }
 
+function stripTrailingParentheticalTitle(title, innerTitle) {
+  if (!title || !innerTitle) return title;
+
+  const escaped = innerTitle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const without = title
+    .replace(new RegExp(`\\s*\\(${escaped}\\)\\s*$`, "i"), "")
+    .trim();
+
+  return without || title;
+}
+
+/** Título principal en resultados de búsqueda: idioma original de la película. */
+export function resolveSearchPrimaryTitle(fallback, arMovie) {
+  const originalTitle = (fallback?.original_title ?? arMovie?.original_title ?? "")
+    .trim();
+
+  if (originalTitle) return originalTitle;
+
+  return arMovie?.title?.trim() || fallback?.title?.trim() || "Sin título";
+}
+
+/** Subtítulo en resultados: español latinoamericano (es-AR), si difiere del original. */
+export function resolveSearchLocalizedTitle(
+  arMovie,
+  mxMovie,
+  fallback,
+  primaryTitle
+) {
+  const arTitle = arMovie?.title?.trim() ?? "";
+  const mxTitle = mxMovie?.title?.trim() ?? "";
+  let localized = arTitle || mxTitle || fallback?.title?.trim() || "";
+
+  localized = stripTrailingParentheticalTitle(localized, primaryTitle);
+
+  if (!localized) return null;
+  if (localized.toLowerCase() === primaryTitle.toLowerCase()) return null;
+
+  if (isArgentineMovie(arMovie ?? fallback)) {
+    return null;
+  }
+
+  return localized;
+}
+
 export function mapTmdbMovie(movie, options = {}) {
   const originalLanguage = movie.original_language ?? options.originalLanguage ?? null;
   const posters = options.posters ?? movie.images?.posters ?? null;
@@ -229,6 +273,13 @@ export function mergeMultiLocaleSearchResults(localeResults) {
     const source = arMovie ?? fallback;
     const mapped = mapTmdbMovie(source);
     mapped.title = resolveSearchTitleWithoutArgentina(arMovie, mxMovie, fallback);
+    mapped.searchPrimaryTitle = resolveSearchPrimaryTitle(fallback, arMovie);
+    mapped.searchLocalizedTitle = resolveSearchLocalizedTitle(
+      arMovie,
+      mxMovie,
+      fallback,
+      mapped.searchPrimaryTitle
+    );
     merged.push(mapped);
   }
 
@@ -256,11 +307,18 @@ export async function enrichArgentineMovieTitles(results, fetchMovieById) {
           item.originalTitle?.trim() ||
           item.title;
 
+        const primaryTitle =
+          data.original_title?.trim() ||
+          item.searchPrimaryTitle?.trim() ||
+          title;
+
         return {
           ...item,
           title,
           originalTitle: data.original_title ?? item.originalTitle,
           originalLanguage: data.original_language ?? item.originalLanguage,
+          searchPrimaryTitle: primaryTitle,
+          searchLocalizedTitle: null,
         };
       } catch {
         return item;

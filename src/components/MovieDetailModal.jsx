@@ -2,7 +2,12 @@
 
 import { useEffect, useRef } from "react";
 import { CircleCheck, Star, Trash2, X } from "lucide-react";
-import { formatRuntime, isRatingsComplete } from "@/helpers/movieHelpers";
+import {
+  formatRuntime,
+  getMovieLocalizedTitle,
+  getMoviePrimaryTitle,
+  isRatingsComplete,
+} from "@/helpers/movieHelpers";
 import { useModalCloseAnimation } from "@/hooks/useModalCloseAnimation";
 import { useTmdbMovieDetails } from "@/hooks/useTmdbMovieDetails";
 import CollapsibleSection from "./CollapsibleSection";
@@ -82,6 +87,8 @@ export default function MovieDetailModal({
   };
 
   const runtimeLabel = formatRuntime(runtime ?? displayMovie.runtime);
+  const primaryTitle = getMoviePrimaryTitle(displayMovie);
+  const localizedTitle = getMovieLocalizedTitle(displayMovie);
 
   const dialog = (
     <div
@@ -106,8 +113,11 @@ export default function MovieDetailModal({
         <MoviePoster movie={displayMovie} size="fullWidth" />
         <div className={styles.detailModalHeader}>
           <h2 id="movie-detail-title" className={styles.detailModalTitle}>
-            {displayMovie.title}
+            {primaryTitle}
           </h2>
+          {localizedTitle && (
+            <span className={styles.cardLocalizedTitle}>{localizedTitle}</span>
+          )}
           <div className={styles.detailModalMeta}>
             {displayMovie.year && (
               <span className={styles.detailModalYear}>{displayMovie.year}</span>
@@ -162,7 +172,7 @@ export default function MovieDetailModal({
           type="button"
           className={`${styles.btnDanger} ${styles.btnIconOnly}`}
           onClick={handleDelete}
-          aria-label={`Eliminar ${displayMovie.title} de la lista`}
+          aria-label={`Eliminar ${primaryTitle} de la lista`}
         >
           <Trash2 size={16} strokeWidth={1.75} aria-hidden="true" />
         </button>

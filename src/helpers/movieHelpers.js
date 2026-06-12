@@ -28,9 +28,76 @@ const POSTER_VARIANTS = [
   "posterElegant",
 ];
 
+function stripTrailingParentheticalTitle(title, innerTitle) {
+  if (!title || !innerTitle) return title;
+
+  const escaped = innerTitle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const without = title
+    .replace(new RegExp(`\\s*\\(${escaped}\\)\\s*$`, "i"), "")
+    .trim();
+
+  return without || title;
+}
+
+function extractLegacyLocalizedTitle(storedTitle, primaryTitle) {
+  if (!storedTitle || !primaryTitle) return null;
+
+  const stripped = stripTrailingParentheticalTitle(storedTitle, primaryTitle);
+  if (
+    stripped !== storedTitle &&
+    stripped.toLowerCase() !== primaryTitle.toLowerCase()
+  ) {
+    return stripped;
+  }
+
+  const parenMatch = storedTitle.match(/^\s*.+?\s*\(([^)]+)\)\s*$/);
+  if (parenMatch) {
+    const inner = parenMatch[1].trim();
+    if (inner.toLowerCase() !== primaryTitle.toLowerCase()) {
+      return inner;
+    }
+  }
+
+  if (storedTitle.toLowerCase() !== primaryTitle.toLowerCase()) {
+    return storedTitle;
+  }
+
+  return null;
+}
+
+/** Título principal visible: idioma original de la película. */
+export function getMoviePrimaryTitle(movie) {
+  if (!movie) return "Sin título";
+
+  const title = movie.title?.trim() ?? "";
+  const original = movie.originalTitle?.trim() ?? "";
+
+  if (movie.localizedTitle != null) {
+    return title || original || "Sin título";
+  }
+
+  return original || title || "Sin título";
+}
+
+/** Subtítulo en español latinoamericano, si difiere del título principal. */
+export function getMovieLocalizedTitle(movie) {
+  if (!movie) return null;
+
+  const primary = getMoviePrimaryTitle(movie);
+
+  if (movie.localizedTitle?.trim()) {
+    const localized = movie.localizedTitle.trim();
+    if (localized.toLowerCase() === primary.toLowerCase()) return null;
+    return localized;
+  }
+
+  return extractLegacyLocalizedTitle(movie.title?.trim() ?? "", primary);
+}
+
 const TMDB_DEFAULTS = {
   tmdbId: null,
   originalTitle: null,
+  localizedTitle: null,
   originalLanguage: null,
   overview: null,
   releaseDate: null,
@@ -183,6 +250,7 @@ export function normalizeMovie(movie) {
       typeof movie.timesPicked === "number" ? movie.timesPicked : 0,
     tmdbId: movie.tmdbId ?? null,
     originalTitle: movie.originalTitle ?? null,
+    localizedTitle: movie.localizedTitle ?? null,
     originalLanguage: movie.originalLanguage ?? null,
     overview: movie.overview ?? null,
     releaseDate,
@@ -214,15 +282,21 @@ export function createMovie(title, status = "pending") {
 
 export function createMovieFromTmdb(tmdbData, status = "pending") {
   const now = new Date().toISOString();
+  const primaryTitle =
+    tmdbData.searchPrimaryTitle?.trim() ||
+    tmdbData.originalTitle?.trim() ||
+    tmdbData.title;
+
   return normalizeMovie({
     id: crypto.randomUUID(),
-    title: tmdbData.title,
+    title: primaryTitle,
     status,
     createdAt: now,
     watchedAt: null,
     timesPicked: 0,
     tmdbId: tmdbData.tmdbId,
-    originalTitle: tmdbData.originalTitle,
+    originalTitle: tmdbData.originalTitle ?? primaryTitle,
+    localizedTitle: tmdbData.searchLocalizedTitle ?? null,
     originalLanguage: tmdbData.originalLanguage ?? null,
     overview: tmdbData.overview,
     releaseDate: tmdbData.releaseDate,

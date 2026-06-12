@@ -1252,6 +1252,15 @@
   overflow: hidden;
 }
 
+.cardLocalizedTitle {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .cardMeta {
   display: flex;
   align-items: center;
@@ -3208,5 +3217,163 @@
 .copyToastVisible {
   opacity: 1;
   transform: translate(-50%, 0);
+}
+
+.addedMovieToastHost {
+  position: fixed;
+  left: var(--spacing-md);
+  right: var(--spacing-md);
+  bottom: calc(var(--nav-height) + var(--spacing-sm));
+  z-index: 150;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(24px) scale(0.97);
+  transition:
+    opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+
+  @media (min-width: 1024px) {
+    left: calc(var(--sidebar-width) + var(--spacing-lg));
+    right: var(--spacing-lg);
+    bottom: var(--spacing-lg);
+    max-width: min(520px, calc(100% - var(--sidebar-width) - var(--spacing-xl) * 2));
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+.addedMovieToastHostVisible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.addedMovieToast {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  box-shadow: var(--shadow-soft), var(--shadow-gold-soft);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover,
+  &:focus-visible {
+    border-color: rgba(212, 175, 55, 0.36);
+    box-shadow: var(--shadow-soft), 0 0 32px rgba(212, 175, 55, 0.16);
+    outline: none;
+  }
+}
+
+.addedMovieToastLayout {
+  display: flex;
+  align-items: stretch;
+  min-height: 108px;
+
+  .cardVerticalPoster {
+    width: 72px;
+    min-width: 72px;
+    align-self: stretch;
+    aspect-ratio: auto;
+    border-bottom: none;
+    border-right: 1px solid rgba(212, 175, 55, 0.12);
+  }
+
+  .cardVerticalPosterFallback {
+    font-size: 1rem;
+  }
+}
+
+.addedMovieToastContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  flex: 1;
+  min-width: 0;
+  padding: var(--spacing-md) var(--spacing-md) var(--spacing-md) 0;
+}
+
+.addedMovieToastLabel {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+}
+
+.addedMovieToastTitleRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.addedMovieToastTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.addedMovieToastProgress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  display: block;
+  height: 4px;
+  background: rgba(212, 175, 55, 0.14);
+  overflow: hidden;
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+}
+
+.addedMovieToastProgressFill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    #a8841f 0%,
+    var(--color-gold) 40%,
+    var(--color-gold-soft) 100%
+  );
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.55);
+  transform-origin: left center;
+  animation-name: addedMovieToastProgress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes addedMovieToastProgress {
+  from {
+    transform: scaleX(1);
+  }
+
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .addedMovieToastHost {
+    transition: none;
+    transform: none;
+  }
+
+  .addedMovieToastProgressFill {
+    animation: none;
+    transform: scaleX(0);
+  }
 }
 
